@@ -1,18 +1,6 @@
-/**
- * Sit-Still Digital Business Card — App Logic
- *
- * Responsibilities:
- *  1. Register service worker
- *  2. Show "Add to Home Screen" prompt in browser mode
- *  3. Dark / light mode toggle (persisted in localStorage)
- *  4. Generate QR code encoding a vCard 3.0 string
- *  5. Web Share API — share .vcf file or fallback link
- *  6. DeviceOrientation parallax tilt
- */
-
 'use strict';
 
-// ─── vCard data ───────────────────────────────────────────────────────────────
+// ─── vCard ────────────────────────────────────────────────────────────────────
 
 const VCARD = [
   'BEGIN:VCARD',
@@ -20,7 +8,7 @@ const VCARD = [
   'FN:Will DiBernardo',
   'N:DiBernardo;Will;;;',
   'ORG:Sit-Still Landscape Architecture',
-  'TITLE:RLA\\, ASLA\\, #6962',
+  'TITLE:Founding Principal',
   'TEL;TYPE=CELL:+12014520547',
   'EMAIL;TYPE=INTERNET:will@sit-still.com',
   'URL:https://sit-still.com',
@@ -28,52 +16,51 @@ const VCARD = [
   'END:VCARD',
 ].join('\r\n');
 
-// ─── Service worker registration ──────────────────────────────────────────────
+// ─── Service worker ───────────────────────────────────────────────────────────
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch((err) => {
-      console.warn('Service worker registration failed:', err);
-    });
+    navigator.serviceWorker.register('./service-worker.js')
+      .catch(err => console.warn('SW registration failed:', err));
   });
 }
 
-// ─── DOM references ───────────────────────────────────────────────────────────
+// ─── DOM ──────────────────────────────────────────────────────────────────────
 
 const body          = document.body;
 const card          = document.getElementById('card');
+const qrcodeEl      = document.getElementById('qrcode');
 const btnTheme      = document.getElementById('btnTheme');
+const themeLabel    = document.getElementById('themeLabel');
 const btnShare      = document.getElementById('btnShare');
 const installPrompt = document.getElementById('installPrompt');
 const dismissPrompt = document.getElementById('dismissPrompt');
-const qrcodeEl      = document.getElementById('qrcode');
+const themeColorMeta = document.getElementById('theme-color-meta');
 
-// ─── Theme (dark / light) ─────────────────────────────────────────────────────
+// ─── Theme ────────────────────────────────────────────────────────────────────
 
-/**
- * Priority order:
- *  1. User's saved preference (localStorage)
- *  2. System preference
- *  3. Default: dark (per design spec)
- */
 function getInitialTheme() {
   const saved = localStorage.getItem('ss-theme');
   if (saved === 'dark' || saved === 'light') return saved;
-  if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-  return 'dark';   // default is dark
+  // Default: light (matches body class in HTML)
+  return 'light';
 }
 
 function applyTheme(theme) {
-  body.classList.toggle('dark',  theme === 'dark');
-  body.classList.toggle('light', theme === 'light');
+  const isDark = theme === 'dark';
+  body.classList.toggle('dark',  isDark);
+  body.classList.toggle('light', !isDark);
 
-  // Update PWA status-bar theme-color meta
-  const themeColorMeta = document.getElementById('theme-color-meta');
   if (themeColorMeta) {
-    themeColorMeta.setAttribute('content', theme === 'dark' ? '#1a1917' : '#f5f3ef');
+    themeColorMeta.setAttribute('content', isDark ? '#0f0f0f' : '#ffffff');
+  }
+  if (themeLabel) {
+    themeLabel.textContent = isDark ? 'light mode' : 'dark mode';
+  }
+  if (btnTheme) {
+    btnTheme.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
   }
 
-  // Rebuild QR in the new colour scheme
   buildQRCode();
 }
 
@@ -83,61 +70,52 @@ function toggleTheme() {
   applyTheme(next);
 }
 
-// Apply on load (before first paint — body already has class="dark" from HTML)
 applyTheme(getInitialTheme());
-
 btnTheme.addEventListener('click', toggleTheme);
 
-// ─── QR Code generation ───────────────────────────────────────────────────────
+// ─── QR code ──────────────────────────────────────────────────────────────────
 
 function buildQRCode() {
   if (typeof QRCode === 'undefined') {
-    // Library not loaded yet — retry after a short delay
-    setTimeout(buildQRCode, 100);
+    setTimeout(buildQRCode, 80);
     return;
   }
 
-  // Clear previous render
   qrcodeEl.innerHTML = '';
 
   const isDark = body.classList.contains('dark');
 
   new QRCode(qrcodeEl, {
     text:         VCARD,
-    width:        512,        // render at high resolution; CSS scales it down
+    width:        512,
     height:       512,
-    colorDark:    isDark ? '#f5f3ef' : '#1a1917',
-    colorLight:   isDark ? '#1a1917' : '#f5f3ef',
+    colorDark:    isDark ? '#f5f3ef' : '#0f0f0f',
+    colorLight:   isDark ? '#0f0f0f' : '#ffffff',
     correctLevel: QRCode.CorrectLevel.M,
   });
 }
 
-// Trigger QR build once DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', buildQRCode);
 } else {
   buildQRCode();
 }
 
-// ─── Share (Web Share API / vCard file) ───────────────────────────────────────
-
-function createVcfBlob() {
-  return new Blob([VCARD], { type: 'text/vcard' });
-}
+// ─── Share ────────────────────────────────────────────────────────────────────
 
 btnShare.addEventListener('click', async () => {
-  const vcfBlob = createVcfBlob();
-  const vcfFile = new File([vcfBlob], 'will-dibernardo.vcf', { type: 'text/vcard' });
+  const blob = new Blob([VCARD], { type: 'text/vcard' });
+  const file = new File([blob], 'will-dibernardo.vcf', { type: 'text/vcard' });
 
   if (navigator.share) {
     try {
-      const canShareFile = navigator.canShare && navigator.canShare({ files: [vcfFile] });
-      if (canShareFile) {
-        await navigator.share({ files: [vcfFile], title: 'Will DiBernardo' });
+      const canFile = navigator.canShare && navigator.canShare({ files: [file] });
+      if (canFile) {
+        await navigator.share({ files: [file], title: 'Will DiBernardo' });
       } else {
         await navigator.share({
           title: 'Will DiBernardo — Sit-Still Landscape Architecture',
-          text:  'RLA, ASLA, #6962 | will@sit-still.com | 201.452.0547',
+          text:  'will@sit-still.com · 201.452.0547',
           url:   'https://sit-still.com',
         });
       }
@@ -145,9 +123,11 @@ btnShare.addEventListener('click', async () => {
       if (err.name !== 'AbortError') console.warn('Share failed:', err);
     }
   } else {
-    // Fallback: download .vcf file
-    const url = URL.createObjectURL(vcfBlob);
-    const a   = Object.assign(document.createElement('a'), { href: url, download: 'will-dibernardo.vcf' });
+    // Fallback: download .vcf
+    const url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), {
+      href: url, download: 'will-dibernardo.vcf'
+    });
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -158,37 +138,31 @@ btnShare.addEventListener('click', async () => {
 // ─── Install prompt ───────────────────────────────────────────────────────────
 
 function isStandalone() {
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true
-  );
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
 }
 
-function showInstallPrompt() {
+window.addEventListener('load', () => {
   if (!isStandalone() && !sessionStorage.getItem('ss-prompt-dismissed')) {
     setTimeout(() => installPrompt.classList.add('visible'), 1400);
   }
-}
+});
 
 dismissPrompt.addEventListener('click', () => {
   installPrompt.classList.remove('visible');
   sessionStorage.setItem('ss-prompt-dismissed', '1');
 });
 
-window.addEventListener('load', showInstallPrompt);
+// ─── Tilt parallax ───────────────────────────────────────────────────────────
 
-// ─── DeviceOrientation parallax tilt ─────────────────────────────────────────
-
-const TILT_MAX = 4;   // degrees
+const TILT_MAX = 3;
 let tiltEnabled = false;
 
 function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
 
 function handleOrientation(e) {
-  const beta  = e.beta  ?? 0;
-  const gamma = e.gamma ?? 0;
-  const tx = clamp((beta  - 90) / 30, -1, 1) * TILT_MAX;
-  const ty = clamp(gamma        / 30, -1, 1) * TILT_MAX;
+  const tx = clamp((( e.beta  ?? 0) - 90) / 30, -1, 1) * TILT_MAX;
+  const ty = clamp(   e.gamma ?? 0         / 30, -1, 1) * TILT_MAX;
   card.style.setProperty('--tilt-x', `${(-tx).toFixed(2)}deg`);
   card.style.setProperty('--tilt-y', `${ty.toFixed(2)}deg`);
 }
@@ -201,7 +175,6 @@ function enableTilt() {
 
 if (typeof DeviceOrientationEvent !== 'undefined') {
   if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+: request on first touch
     document.addEventListener('touchstart', () => {
       DeviceOrientationEvent.requestPermission()
         .then(s => { if (s === 'granted') enableTilt(); })
