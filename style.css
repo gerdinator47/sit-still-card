@@ -38,12 +38,11 @@
   --font: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
   /* Type scale — matched to physical card proportions */
-  --size-wordmark:        clamp(72px, 19vw, 110px); /* sit— / still: massive, fills width */
-  --size-header-logo:     clamp(17px, 4.2vw, 22px); /* "sit—still" compact top header    */
+  --size-wordmark:        clamp(72px, 19vw, 110px); /* sit— / still: massive ExtraBold   */
   --size-header-sub:      clamp(13px, 3.2vw, 16px); /* "landscape architecture / LA"     */
-  --size-name:            clamp(28px, 7vw, 40px);   /* Will DiBernardo                   */
-  --size-contact:         clamp(14px, 3.5vw, 18px); /* email / phone                     */
-  --size-credentials:     clamp(12px, 3vw, 15px);   /* RLA, ASLA, #6962                  */
+  --size-name:            clamp(26px, 6.5vw, 38px); /* Will DiBernardo — SemiBold        */
+  --size-contact:         clamp(13px, 3.2vw, 16px); /* email / phone — Medium            */
+  --size-credentials:     clamp(12px, 3vw, 14px);   /* RLA, ASLA, #6962 — Medium         */
   --size-label:           clamp(9px, 2.2vw, 11px);  /* "scan to save" / "share"          */
 
   /* Transitions */
@@ -213,26 +212,30 @@ body.light .icon-sun  { display: none; }
   flex-direction: column;
 }
 
-/* Top zone: wordmark dominates */
+/* Top zone: wordmark — shrinks to its content */
 .zone--wordmark {
   flex: 0 0 auto;
   justify-content: flex-start;
-  padding-bottom: clamp(20px, 5vh, 36px);
 }
 
-/* Middle zone: QR — takes remaining space, centres content */
+/* Spacer between wordmark and QR — the "breathing room" of the physical card */
+.zone--spacer {
+  flex: 1 1 auto;   /* absorbs all leftover vertical space */
+  min-height: clamp(16px, 3vh, 32px);
+}
+
+/* Middle zone: QR — shrinks to content, no stretching */
 .zone--qr {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   align-items: flex-start;
-  justify-content: center;
-  gap: 10px;
-  min-height: 0; /* prevent flex overflow */
+  gap: 8px;
+  padding-bottom: clamp(16px, 4vh, 28px);
 }
 
-/* Bottom zone: contact — fixed to bottom */
+/* Bottom zone: contact — anchored to bottom */
 .zone--contact {
   flex: 0 0 auto;
-  gap: clamp(6px, 1.5vh, 12px);
+  gap: clamp(4px, 1vh, 8px);
   border-top: 1px solid var(--color-border);
   padding-top: clamp(12px, 2.5vh, 20px);
 }
@@ -264,8 +267,8 @@ body.light .icon-sun  { display: none; }
 
 .wordmark__sub {
   font-size: var(--size-header-sub);
-  font-weight: 400;
-  letter-spacing: 0em;         /* physical card has no tracking on "landscape architecture" */
+  font-weight: 500;            /* Medium — slightly more presence than Regular */
+  letter-spacing: 0em;
   color: var(--color-text-muted);
   line-height: 1.5;
   margin-top: clamp(8px, 2vh, 14px);
@@ -274,10 +277,10 @@ body.light .icon-sun  { display: none; }
 /* ─── Zone 2: QR code ─────────────────────────────────────── */
 
 .qr-container {
-  width: min(190px, 46vw);
-  height: min(190px, 46vw);
+  width: min(140px, 36vw);     /* smaller — QR is functional, not decorative */
+  height: min(140px, 36vw);
   flex-shrink: 0;
-  background-color: var(--color-bg); /* quiet zone matches card bg */
+  background-color: var(--color-bg);
   transition: background-color 0.4s ease;
 }
 
@@ -308,7 +311,7 @@ body.light .icon-sun  { display: none; }
 
 .name {
   font-size: var(--size-name);
-  font-weight: 700;            /* Bold — prominent, matches card */
+  font-weight: 600;            /* SemiBold — prominent but not as heavy as the wordmark */
   letter-spacing: -0.02em;
   line-height: 1.05;
   color: var(--color-text);
@@ -316,7 +319,7 @@ body.light .icon-sun  { display: none; }
 
 .credentials {
   font-size: var(--size-credentials);
-  font-weight: 400;
+  font-weight: 500;            /* Medium */
   letter-spacing: 0em;
   color: var(--color-text-muted);
   margin-top: 2px;
@@ -331,8 +334,8 @@ body.light .icon-sun  { display: none; }
 
 .contact-line {
   font-size: var(--size-contact);
-  font-weight: 400;
-  letter-spacing: 0em;         /* physical card: no tracking on contact info */
+  font-weight: 500;            /* Medium — readable, matches card body text weight */
+  letter-spacing: 0em;
   color: var(--color-text);
   display: block;
   -webkit-user-select: text;
