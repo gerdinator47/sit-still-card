@@ -4,14 +4,13 @@
 
    FONT: Inter Variable
    ────────────────────
-   Uses Inter-VariableFont_opsz,wght.ttf — a single file that
-   covers all weights (100–900) and optical sizes via font axes.
-
-   To swap fonts later: replace the @font-face src below and
-   update the --font-card custom property in :root.
+   Uses Inter-VariableFont_opsz,wght.ttf
+   Weight reference from physical card:
+     800  → wordmark "sit—" / "still" (ExtraBold)
+     700  → "sit—still" compact header, "Will DiBernardo"
+     400  → contact info, "landscape architecture", "los angeles"
+     300  → credentials, labels, url
    ============================================================ */
-
-/* ─── @font-face — Inter Variable ────────────────────────── */
 
 @font-face {
   font-family: 'Inter';
@@ -30,27 +29,29 @@
   --color-text-muted: #9e9a94;
   --color-border:     rgba(245, 243, 239, 0.12);
 
-  /* Spacing — safe areas for iPhone notch/home bar */
-  --pad-x:    min(7vw, 36px);
-  --pad-top:  max(env(safe-area-inset-top), 52px);
-  --pad-bot:  max(env(safe-area-inset-bottom), 36px);
+  /* Safe-area padding for iPhone notch + home indicator */
+  --pad-x:    min(6.5vw, 32px);
+  --pad-top:  max(env(safe-area-inset-top), 48px);
+  --pad-bot:  max(env(safe-area-inset-bottom), 32px);
 
-  /* Typography */
-  --font-card:          'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --size-wordmark:      clamp(64px, 17vw, 96px);   /* big stacked wordmark */
-  --size-wordmark-sub:  clamp(11px, 2.8vw, 14px);
-  --size-name:          clamp(26px, 6.5vw, 36px);
-  --size-credentials:   clamp(10px, 2.6vw, 13px);
-  --size-contact:       clamp(13px, 3.2vw, 16px);
-  --size-label:         clamp(9px, 2.2vw, 11px);
+  /* Font */
+  --font: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
-  /* Animation */
+  /* Type scale — matched to physical card proportions */
+  --size-wordmark:        clamp(72px, 19vw, 110px); /* sit— / still: massive, fills width */
+  --size-header-logo:     clamp(17px, 4.2vw, 22px); /* "sit—still" compact top header    */
+  --size-header-sub:      clamp(13px, 3.2vw, 16px); /* "landscape architecture / LA"     */
+  --size-name:            clamp(28px, 7vw, 40px);   /* Will DiBernardo                   */
+  --size-contact:         clamp(14px, 3.5vw, 18px); /* email / phone                     */
+  --size-credentials:     clamp(12px, 3vw, 15px);   /* RLA, ASLA, #6962                  */
+  --size-label:           clamp(9px, 2.2vw, 11px);  /* "scan to save" / "share"          */
+
+  /* Transitions */
   --transition-theme: color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
   --tilt-x: 0deg;
   --tilt-y: 0deg;
 }
 
-/* Light mode overrides (toggled by JS adding .light to body) */
 body.light {
   --color-bg:         #f5f3ef;
   --color-text:       #1a1917;
@@ -68,7 +69,6 @@ body.light {
 
 html {
   height: 100%;
-  /* Belt-and-suspenders zoom kill for iOS Safari */
   touch-action: pan-y;
 }
 
@@ -76,7 +76,7 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  font-family: var(--font-card);
+  font-family: var(--font);
   font-optical-sizing: auto;
   background-color: var(--color-bg);
   color: var(--color-text);
@@ -87,7 +87,6 @@ body {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
-  /* Kill double-tap zoom on iOS without JS */
   touch-action: manipulation;
 }
 
@@ -96,7 +95,6 @@ a {
   text-decoration: none;
   -webkit-user-select: text;
   user-select: text;
-  /* Allow tap but not zoom */
   touch-action: manipulation;
 }
 
@@ -139,8 +137,8 @@ button {
 
 .install-prompt__text {
   font-size: 12px;
-  font-weight: 300;
-  letter-spacing: 0.04em;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   line-height: 1.4;
 }
 
@@ -173,14 +171,9 @@ button {
     rotateY(var(--tilt-y));
 }
 
-/* ─── Controls: theme toggle only, top-right ──────────────── */
+/* ─── Theme toggle — absolute top-right ───────────────────── */
 
 .card__controls {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 0;
-  /* Positioned absolutely so it doesn't consume zone space */
   position: absolute;
   top: max(env(safe-area-inset-top), 18px);
   right: var(--pad-x);
@@ -193,7 +186,7 @@ button {
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  opacity: 0.6;
+  opacity: 0.5;
   transition: opacity 0.2s ease;
   padding: 9px;
   margin: -9px;
@@ -205,82 +198,89 @@ button {
   outline: none;
 }
 
-/* Sun shown in dark mode (to switch to light); moon shown in light mode */
 body.dark  .icon-moon { display: none; }
 body.light .icon-sun  { display: none; }
 
 /* ─── Three-zone layout ───────────────────────────────────── */
+/*
+  Zone 1 (top):    sit—still wordmark — large, fills the upper portion
+  Zone 2 (middle): QR code — centred
+  Zone 3 (bottom): Name + contact — anchored to bottom
+*/
 
 .zone {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
 }
 
-/* Zone 1: Wordmark — top, larger share */
+/* Top zone: wordmark dominates */
 .zone--wordmark {
-  flex: 2.2;
-  justify-content: flex-end;  /* anchor to bottom of zone so QR sits close below */
-  padding-bottom: clamp(16px, 4vh, 28px);
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  padding-bottom: clamp(20px, 5vh, 36px);
 }
 
-/* Zone 2: QR — centre */
+/* Middle zone: QR — takes remaining space, centres content */
 .zone--qr {
-  flex: 2.8;
+  flex: 1 1 auto;
   align-items: flex-start;
   justify-content: center;
   gap: 10px;
+  min-height: 0; /* prevent flex overflow */
 }
 
-/* Zone 3: Contact — bottom */
+/* Bottom zone: contact — fixed to bottom */
 .zone--contact {
-  flex: 2;
-  justify-content: flex-end;
-  gap: clamp(10px, 2.5vh, 18px);
+  flex: 0 0 auto;
+  gap: clamp(6px, 1.5vh, 12px);
   border-top: 1px solid var(--color-border);
-  padding-top: clamp(12px, 3vh, 20px);
+  padding-top: clamp(12px, 2.5vh, 20px);
 }
 
 /* ─── Zone 1: Wordmark ────────────────────────────────────── */
+/*
+  Physical card: "sit—" and "still" are enormous ExtraBold text,
+  filling nearly full card width. Em-dash is same weight as letters,
+  proportional — not a long bar. Zero letter-spacing.
+*/
 
 .wordmark {
   display: flex;
   flex-direction: column;
-  line-height: 0.92;
-  margin-bottom: clamp(6px, 1.5vw, 12px);
+  /* Tight line-height so sit— and still feel like one unit */
+  line-height: 0.88;
+  margin-bottom: clamp(10px, 2.5vh, 18px);
 }
 
 .wordmark__line {
   font-size: var(--size-wordmark);
-  font-weight: 300;
-  letter-spacing: -0.03em;
+  font-weight: 800;            /* ExtraBold — matches physical card */
+  letter-spacing: -0.01em;    /* Inter at 800w reads slightly wide; minimal tightening */
   color: var(--color-text);
   display: block;
 }
 
+/* The em-dash in Inter at 800w renders well — no extra spacing needed */
+
 .wordmark__sub {
-  font-size: var(--size-wordmark-sub);
-  font-weight: 300;
-  letter-spacing: 0.10em;
+  font-size: var(--size-header-sub);
+  font-weight: 400;
+  letter-spacing: 0em;         /* physical card has no tracking on "landscape architecture" */
   color: var(--color-text-muted);
-  text-transform: lowercase;
+  line-height: 1.5;
+  margin-top: clamp(8px, 2vh, 14px);
 }
 
 /* ─── Zone 2: QR code ─────────────────────────────────────── */
 
 .qr-container {
-  /*
-    Size: big enough to scan easily but not dominating.
-    Uses a square based on viewport width, capped at 200px.
-  */
-  width: min(200px, 48vw);
-  height: min(200px, 48vw);
+  width: min(190px, 46vw);
+  height: min(190px, 46vw);
   flex-shrink: 0;
-  /* Slight inset padding so the QR quiet zone reads well */
-  background-color: var(--color-bg);
+  background-color: var(--color-bg); /* quiet zone matches card bg */
+  transition: background-color 0.4s ease;
 }
 
-/* qrcode.js renders a canvas — make it fill the container */
 .qr-container canvas,
 .qr-container img {
   width: 100% !important;
@@ -290,23 +290,25 @@ body.light .icon-sun  { display: none; }
 
 .qr-label {
   font-size: var(--size-label);
-  font-weight: 300;
-  letter-spacing: 0.10em;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   text-transform: lowercase;
   color: var(--color-text-muted);
 }
 
 /* ─── Zone 3: Contact ─────────────────────────────────────── */
-
-.contact-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+/*
+  Physical card back:
+  - "Will DiBernardo" — bold, largest element in bottom block
+  - "RLA, ASLA, #6962" — regular, noticeably smaller
+  - email + phone — regular, same size as credentials
+  - "sit—still / landscape architecture / los angeles" — compact bold header top of card
+    (in our single-view app this moves to top zone instead)
+*/
 
 .name {
   font-size: var(--size-name);
-  font-weight: 400;
+  font-weight: 700;            /* Bold — prominent, matches card */
   letter-spacing: -0.02em;
   line-height: 1.05;
   color: var(--color-text);
@@ -314,32 +316,35 @@ body.light .icon-sun  { display: none; }
 
 .credentials {
   font-size: var(--size-credentials);
-  font-weight: 300;
-  letter-spacing: 0.08em;
+  font-weight: 400;
+  letter-spacing: 0em;
   color: var(--color-text-muted);
+  margin-top: 2px;
 }
 
 .contact-lines {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  margin-top: clamp(4px, 1vh, 8px);
 }
 
 .contact-line {
   font-size: var(--size-contact);
-  font-weight: 300;
-  letter-spacing: 0.01em;
+  font-weight: 400;
+  letter-spacing: 0em;         /* physical card: no tracking on contact info */
   color: var(--color-text);
   display: block;
   -webkit-user-select: text;
   user-select: text;
 }
 
-/* Footer row: share button + URL */
+/* Footer row: share + url */
 .contact-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: clamp(4px, 1vh, 8px);
 }
 
 .btn-share {
@@ -347,11 +352,11 @@ body.light .icon-sun  { display: none; }
   align-items: center;
   gap: 6px;
   font-size: var(--size-label);
-  font-weight: 300;
-  letter-spacing: 0.10em;
+  font-weight: 400;
+  letter-spacing: 0.06em;
   text-transform: lowercase;
   color: var(--color-text-muted);
-  opacity: 0.75;
+  opacity: 0.7;
   transition: opacity 0.2s ease;
   padding: 6px 0;
 }
@@ -364,24 +369,24 @@ body.light .icon-sun  { display: none; }
 
 .contact-url {
   font-size: var(--size-label);
-  font-weight: 300;
-  letter-spacing: 0.08em;
+  font-weight: 400;
+  letter-spacing: 0.04em;
   color: var(--color-text-muted);
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
-/* ─── Load animation ──────────────────────────────────────── */
+/* ─── Fade-in on load ─────────────────────────────────────── */
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: perspective(900px) translateY(10px); }
-  to   { opacity: 1; transform: perspective(900px) translateY(0); }
+  from { opacity: 0; transform: perspective(900px) translateY(8px); }
+  to   { opacity: 1; transform: perspective(900px) translateY(0);   }
 }
 
 .card {
-  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ─── Accessibility: reduced motion ──────────────────────── */
+/* ─── Reduced motion ──────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -390,16 +395,12 @@ body.light .icon-sun  { display: none; }
   }
 }
 
-/* ─── Landscape on small screens ─────────────────────────── */
+/* ─── Landscape / small screens ──────────────────────────── */
 
 @media (orientation: landscape) and (max-height: 480px) {
   :root {
-    --size-wordmark:    clamp(40px, 10vw, 56px);
-    --pad-top:          max(env(safe-area-inset-top), 16px);
-    --pad-bot:          max(env(safe-area-inset-bottom), 12px);
+    --size-wordmark: clamp(44px, 11vw, 60px);
+    --pad-top:       max(env(safe-area-inset-top), 16px);
+    --pad-bot:       max(env(safe-area-inset-bottom), 12px);
   }
-
-  .zone--wordmark { flex: 1.5; }
-  .zone--qr       { flex: 2; }
-  .zone--contact  { flex: 1.5; }
 }
