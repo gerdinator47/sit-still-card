@@ -16,54 +16,46 @@
 @font-face {
   font-family: 'Inter';
   src: url('fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
-  font-weight: 100 900;        /* full variable weight range */
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  font-named-instance: 'Regular';
 }
 
 /* ─── Design tokens ───────────────────────────────────────── */
 
 :root {
-  /* Light mode (default) */
-  --color-bg:          #f5f3ef;   /* warm off-white */
-  --color-text:        #1a1917;   /* near-black */
-  --color-text-muted:  #6b6862;   /* secondary text */
-  --color-border:      rgba(26, 25, 23, 0.10);
-  --color-qr-bg:       #f5f3ef;
-  --color-qr-fg:       #1a1917;
+  /* Dark mode is DEFAULT */
+  --color-bg:         #1a1917;
+  --color-text:       #f5f3ef;
+  --color-text-muted: #9e9a94;
+  --color-border:     rgba(245, 243, 239, 0.12);
 
-  /* Spacing — proportioned for iPhone portrait */
+  /* Spacing — safe areas for iPhone notch/home bar */
   --pad-x:    min(7vw, 36px);
-  --pad-top:  max(env(safe-area-inset-top), 48px);
-  --pad-bot:  max(env(safe-area-inset-bottom), 32px);
+  --pad-top:  max(env(safe-area-inset-top), 52px);
+  --pad-bot:  max(env(safe-area-inset-bottom), 36px);
 
   /* Typography */
-  --font-card: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --size-name:        clamp(28px, 7vw, 38px);
-  --size-credentials: clamp(11px, 2.8vw, 14px);
-  --size-contact:     clamp(13px, 3.2vw, 16px);
-  --size-wordmark-lg: clamp(52px, 14vw, 80px);
-  --size-wordmark-sm: clamp(11px, 2.8vw, 14px);
-  --size-label:       clamp(9px, 2.2vw, 11px);
+  --font-card:          'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --size-wordmark:      clamp(64px, 17vw, 96px);   /* big stacked wordmark */
+  --size-wordmark-sub:  clamp(11px, 2.8vw, 14px);
+  --size-name:          clamp(26px, 6.5vw, 36px);
+  --size-credentials:   clamp(10px, 2.6vw, 13px);
+  --size-contact:       clamp(13px, 3.2vw, 16px);
+  --size-label:         clamp(9px, 2.2vw, 11px);
 
   /* Animation */
-  --transition-theme:  color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
-  --transition-tilt:   transform 0.25s ease-out;
-
-  /* Tilt parallax range */
+  --transition-theme: color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
   --tilt-x: 0deg;
   --tilt-y: 0deg;
 }
 
-/* Dark mode token overrides */
-body.dark {
-  --color-bg:         #1a1917;
-  --color-text:       #f5f3ef;
-  --color-text-muted: #9e9a94;
-  --color-border:     rgba(245, 243, 239, 0.10);
-  --color-qr-bg:      #1a1917;
-  --color-qr-fg:      #f5f3ef;
+/* Light mode overrides (toggled by JS adding .light to body) */
+body.light {
+  --color-bg:         #f5f3ef;
+  --color-text:       #1a1917;
+  --color-text-muted: #6b6862;
+  --color-border:     rgba(26, 25, 23, 0.12);
 }
 
 /* ─── Base reset ──────────────────────────────────────────── */
@@ -74,26 +66,29 @@ body.dark {
   padding: 0;
 }
 
-html, body {
+html {
   height: 100%;
-  width: 100%;
-  overflow: hidden;
+  /* Belt-and-suspenders zoom kill for iOS Safari */
+  touch-action: pan-y;
 }
 
 body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
   font-family: var(--font-card);
-  font-optical-sizing: auto;   /* activates Inter's opsz axis for each size */
+  font-optical-sizing: auto;
   background-color: var(--color-bg);
   color: var(--color-text);
   transition: var(--transition-theme);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Prevent text selection on repeated taps */
   -webkit-user-select: none;
   user-select: none;
-  /* Prevent long-press callout on iOS */
   -webkit-touch-callout: none;
+  /* Kill double-tap zoom on iOS without JS */
+  touch-action: manipulation;
 }
 
 a {
@@ -101,6 +96,8 @@ a {
   text-decoration: none;
   -webkit-user-select: text;
   user-select: text;
+  /* Allow tap but not zoom */
+  touch-action: manipulation;
 }
 
 button {
@@ -110,6 +107,7 @@ button {
   padding: 0;
   color: inherit;
   font-family: inherit;
+  touch-action: manipulation;
 }
 
 /* ─── Install prompt ──────────────────────────────────────── */
@@ -167,53 +165,38 @@ button {
   padding-right: var(--pad-x);
   background-color: var(--color-bg);
   color: var(--color-text);
-  transition: var(--transition-theme), opacity 0.45s ease;
+  transition: var(--transition-theme), transform 0.25s ease-out;
   will-change: transform;
-  /* Subtle tilt via CSS custom properties (set by JS) */
   transform:
     perspective(900px)
     rotateX(var(--tilt-x))
     rotateY(var(--tilt-y));
-  transition: var(--transition-theme), transform var(--transition-tilt);
 }
 
-/* The wordmark/idle side starts hidden */
-.card--wordmark {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.card--wordmark.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-#cardFront.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* ─── Controls strip ──────────────────────────────────────── */
+/* ─── Controls: theme toggle only, top-right ──────────────── */
 
 .card__controls {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-bottom: clamp(24px, 6vh, 40px);
+  margin-bottom: 0;
+  /* Positioned absolutely so it doesn't consume zone space */
+  position: absolute;
+  top: max(env(safe-area-inset-top), 18px);
+  right: var(--pad-x);
 }
 
 .btn-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  transition: color 0.2s ease, opacity 0.2s ease;
-  opacity: 0.7;
-  /* Increase tap target without affecting layout */
-  padding: 8px;
-  margin: -8px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  padding: 9px;
+  margin: -9px;
 }
 
 .btn-icon:hover,
@@ -222,79 +205,82 @@ button {
   outline: none;
 }
 
-/* Sun/moon icon visibility toggled by body class */
-body.light .icon-moon { display: none; }
-body.dark  .icon-sun  { display: none; }
+/* Sun shown in dark mode (to switch to light); moon shown in light mode */
+body.dark  .icon-moon { display: none; }
+body.light .icon-sun  { display: none; }
 
-/* ─── Card body ───────────────────────────────────────────── */
+/* ─── Three-zone layout ───────────────────────────────────── */
 
-.card__body {
-  flex: 1;
+.zone {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
-/* ─── Header: name + credentials ─────────────────────────── */
-
-.card__header {
-  margin-bottom: clamp(20px, 5vh, 36px);
+/* Zone 1: Wordmark — top, larger share */
+.zone--wordmark {
+  flex: 2.2;
+  justify-content: flex-end;  /* anchor to bottom of zone so QR sits close below */
+  padding-bottom: clamp(16px, 4vh, 28px);
 }
 
-.name {
-  font-size: var(--size-name);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  color: var(--color-text);
+/* Zone 2: QR — centre */
+.zone--qr {
+  flex: 2.8;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
 }
 
-.credentials {
-  font-size: var(--size-credentials);
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin-top: 6px;
+/* Zone 3: Contact — bottom */
+.zone--contact {
+  flex: 2;
+  justify-content: flex-end;
+  gap: clamp(10px, 2.5vh, 18px);
+  border-top: 1px solid var(--color-border);
+  padding-top: clamp(12px, 3vh, 20px);
 }
 
-/* ─── Contact lines ───────────────────────────────────────── */
+/* ─── Zone 1: Wordmark ────────────────────────────────────── */
 
-.card__contact {
+.wordmark {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: clamp(20px, 5vh, 32px);
+  line-height: 0.92;
+  margin-bottom: clamp(6px, 1.5vw, 12px);
 }
 
-.contact-line {
-  font-size: var(--size-contact);
+.wordmark__line {
+  font-size: var(--size-wordmark);
   font-weight: 300;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.03em;
   color: var(--color-text);
   display: block;
-  /* Allow text selection for copy-paste */
-  -webkit-user-select: text;
-  user-select: text;
 }
 
-/* ─── QR code ─────────────────────────────────────────────── */
-
-.card__qr {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: clamp(16px, 4vh, 24px);
+.wordmark__sub {
+  font-size: var(--size-wordmark-sub);
+  font-weight: 300;
+  letter-spacing: 0.10em;
+  color: var(--color-text-muted);
+  text-transform: lowercase;
 }
+
+/* ─── Zone 2: QR code ─────────────────────────────────────── */
 
 .qr-container {
-  /* Size is set to match the design; large enough to scan comfortably */
-  width: min(180px, 42vw);
-  height: min(180px, 42vw);
+  /*
+    Size: big enough to scan easily but not dominating.
+    Uses a square based on viewport width, capped at 200px.
+  */
+  width: min(200px, 48vw);
+  height: min(200px, 48vw);
   flex-shrink: 0;
+  /* Slight inset padding so the QR quiet zone reads well */
+  background-color: var(--color-bg);
 }
 
-/* qrcode.js renders a canvas or img — style both */
+/* qrcode.js renders a canvas — make it fill the container */
 .qr-container canvas,
 .qr-container img {
   width: 100% !important;
@@ -310,23 +296,63 @@ body.dark  .icon-sun  { display: none; }
   color: var(--color-text-muted);
 }
 
-/* ─── Share button ────────────────────────────────────────── */
+/* ─── Zone 3: Contact ─────────────────────────────────────── */
 
-.card__share {
-  margin-bottom: clamp(16px, 4vh, 24px);
+.contact-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-size: var(--size-name);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--color-text);
+}
+
+.credentials {
+  font-size: var(--size-credentials);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.contact-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-line {
+  font-size: var(--size-contact);
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  color: var(--color-text);
+  display: block;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Footer row: share button + URL */
+.contact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .btn-share {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   font-size: var(--size-label);
   font-weight: 300;
   letter-spacing: 0.10em;
   text-transform: lowercase;
   color: var(--color-text-muted);
-  transition: color 0.2s ease, opacity 0.2s ease;
-  opacity: 0.8;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
   padding: 6px 0;
 }
 
@@ -336,97 +362,26 @@ body.dark  .icon-sun  { display: none; }
   outline: none;
 }
 
-/* ─── Card footer: wordmark block ─────────────────────────── */
-
-.card__footer {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
-}
-
-.wordmark-block {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.wordmark {
-  font-size: clamp(13px, 3.2vw, 16px);
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--color-text);
-}
-
-.wordmark-sub {
-  font-size: var(--size-wordmark-sm);
+.contact-url {
+  font-size: var(--size-label);
   font-weight: 300;
   letter-spacing: 0.08em;
   color: var(--color-text-muted);
-  text-transform: lowercase;
-}
-
-/* ─── Wordmark / idle side ────────────────────────────────── */
-
-.wordmark-idle {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.wordmark-idle__lines {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.wordmark-idle__line {
-  font-size: var(--size-wordmark-lg);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.0;
-  color: var(--color-text);
-  display: block;
-}
-
-.wordmark-idle__sub {
-  font-size: clamp(13px, 3.2vw, 17px);
-  font-weight: 300;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
-  text-transform: lowercase;
-  margin-top: clamp(10px, 2.5vw, 18px);
-  display: block;
-}
-
-.wordmark-idle__url {
-  font-size: var(--size-wordmark-sm);
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
+  opacity: 0.6;
 }
 
 /* ─── Load animation ──────────────────────────────────────── */
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(0);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: perspective(900px) translateY(10px); }
+  to   { opacity: 1; transform: perspective(900px) translateY(0); }
 }
 
-#cardFront {
-  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+.card {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* ─── Accessibility ───────────────────────────────────────── */
+/* ─── Accessibility: reduced motion ──────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -435,17 +390,16 @@ body.dark  .icon-sun  { display: none; }
   }
 }
 
-/* ─── Landscape guard ─────────────────────────────────────── */
-/* If someone rotates to landscape on a small device, keep it usable */
-@media (orientation: landscape) and (max-height: 500px) {
+/* ─── Landscape on small screens ─────────────────────────── */
+
+@media (orientation: landscape) and (max-height: 480px) {
   :root {
-    --pad-top: max(env(safe-area-inset-top), 16px);
-    --pad-bot: max(env(safe-area-inset-bottom), 12px);
-    --size-name: clamp(20px, 5vw, 28px);
-    --size-wordmark-lg: clamp(36px, 9vw, 52px);
+    --size-wordmark:    clamp(40px, 10vw, 56px);
+    --pad-top:          max(env(safe-area-inset-top), 16px);
+    --pad-bot:          max(env(safe-area-inset-bottom), 12px);
   }
 
-  .card__controls {
-    margin-bottom: 12px;
-  }
+  .zone--wordmark { flex: 1.5; }
+  .zone--qr       { flex: 2; }
+  .zone--contact  { flex: 1.5; }
 }
