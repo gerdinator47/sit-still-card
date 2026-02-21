@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Sit-Still icon: warm off-white background with near-black wordmark -->
+  <rect width="512" height="512" fill="#f5f3ef"/>
+  <!-- "sit" -->
+  <text
+    x="256"
+    y="248"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="148"
+    font-weight="300"
+    letter-spacing="-2"
+    text-anchor="middle"
+    fill="#1a1917">sit</text>
+  <!-- em dash separator -->
+  <text
+    x="256"
+    y="340"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="148"
+    font-weight="300"
+    letter-spacing="-2"
+    text-anchor="middle"
+    fill="#1a1917">still</text>
+</svg>

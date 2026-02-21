@@ -1,0 +1,451 @@
+/* ============================================================
+   Sit-Still Digital Business Card — Stylesheet
+   ============================================================
+
+   FONT: Inter Variable
+   ────────────────────
+   Uses Inter-VariableFont_opsz,wght.ttf — a single file that
+   covers all weights (100–900) and optical sizes via font axes.
+
+   To swap fonts later: replace the @font-face src below and
+   update the --font-card custom property in :root.
+   ============================================================ */
+
+/* ─── @font-face — Inter Variable ────────────────────────── */
+
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;        /* full variable weight range */
+  font-style: normal;
+  font-display: swap;
+  font-named-instance: 'Regular';
+}
+
+/* ─── Design tokens ───────────────────────────────────────── */
+
+:root {
+  /* Light mode (default) */
+  --color-bg:          #f5f3ef;   /* warm off-white */
+  --color-text:        #1a1917;   /* near-black */
+  --color-text-muted:  #6b6862;   /* secondary text */
+  --color-border:      rgba(26, 25, 23, 0.10);
+  --color-qr-bg:       #f5f3ef;
+  --color-qr-fg:       #1a1917;
+
+  /* Spacing — proportioned for iPhone portrait */
+  --pad-x:    min(7vw, 36px);
+  --pad-top:  max(env(safe-area-inset-top), 48px);
+  --pad-bot:  max(env(safe-area-inset-bottom), 32px);
+
+  /* Typography */
+  --font-card: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --size-name:        clamp(28px, 7vw, 38px);
+  --size-credentials: clamp(11px, 2.8vw, 14px);
+  --size-contact:     clamp(13px, 3.2vw, 16px);
+  --size-wordmark-lg: clamp(52px, 14vw, 80px);
+  --size-wordmark-sm: clamp(11px, 2.8vw, 14px);
+  --size-label:       clamp(9px, 2.2vw, 11px);
+
+  /* Animation */
+  --transition-theme:  color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease;
+  --transition-tilt:   transform 0.25s ease-out;
+
+  /* Tilt parallax range */
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+}
+
+/* Dark mode token overrides */
+body.dark {
+  --color-bg:         #1a1917;
+  --color-text:       #f5f3ef;
+  --color-text-muted: #9e9a94;
+  --color-border:     rgba(245, 243, 239, 0.10);
+  --color-qr-bg:      #1a1917;
+  --color-qr-fg:      #f5f3ef;
+}
+
+/* ─── Base reset ──────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-card);
+  font-optical-sizing: auto;   /* activates Inter's opsz axis for each size */
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: var(--transition-theme);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevent text selection on repeated taps */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Prevent long-press callout on iOS */
+  -webkit-touch-callout: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+}
+
+/* ─── Install prompt ──────────────────────────────────────── */
+
+.install-prompt {
+  position: fixed;
+  top: max(env(safe-area-inset-top), 12px);
+  left: var(--pad-x);
+  right: var(--pad-x);
+  z-index: 100;
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+
+.install-prompt.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.install-prompt__text {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+
+.install-prompt__dismiss {
+  font-size: 14px;
+  opacity: 0.6;
+  flex-shrink: 0;
+  padding: 4px;
+  color: var(--color-bg);
+}
+
+/* ─── Card shell ──────────────────────────────────────────── */
+
+.card {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--pad-top);
+  padding-bottom: var(--pad-bot);
+  padding-left: var(--pad-x);
+  padding-right: var(--pad-x);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: var(--transition-theme), opacity 0.45s ease;
+  will-change: transform;
+  /* Subtle tilt via CSS custom properties (set by JS) */
+  transform:
+    perspective(900px)
+    rotateX(var(--tilt-x))
+    rotateY(var(--tilt-y));
+  transition: var(--transition-theme), transform var(--transition-tilt);
+}
+
+/* The wordmark/idle side starts hidden */
+.card--wordmark {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card--wordmark.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#cardFront.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Controls strip ──────────────────────────────────────── */
+
+.card__controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(24px, 6vh, 40px);
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease, opacity 0.2s ease;
+  opacity: 0.7;
+  /* Increase tap target without affecting layout */
+  padding: 8px;
+  margin: -8px;
+}
+
+.btn-icon:hover,
+.btn-icon:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+/* Sun/moon icon visibility toggled by body class */
+body.light .icon-moon { display: none; }
+body.dark  .icon-sun  { display: none; }
+
+/* ─── Card body ───────────────────────────────────────────── */
+
+.card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ─── Header: name + credentials ─────────────────────────── */
+
+.card__header {
+  margin-bottom: clamp(20px, 5vh, 36px);
+}
+
+.name {
+  font-size: var(--size-name);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.credentials {
+  font-size: var(--size-credentials);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
+/* ─── Contact lines ───────────────────────────────────────── */
+
+.card__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: clamp(20px, 5vh, 32px);
+}
+
+.contact-line {
+  font-size: var(--size-contact);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+  display: block;
+  /* Allow text selection for copy-paste */
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ─── QR code ─────────────────────────────────────────────── */
+
+.card__qr {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: clamp(16px, 4vh, 24px);
+}
+
+.qr-container {
+  /* Size is set to match the design; large enough to scan comfortably */
+  width: min(180px, 42vw);
+  height: min(180px, 42vw);
+  flex-shrink: 0;
+}
+
+/* qrcode.js renders a canvas or img — style both */
+.qr-container canvas,
+.qr-container img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.qr-label {
+  font-size: var(--size-label);
+  font-weight: 300;
+  letter-spacing: 0.10em;
+  text-transform: lowercase;
+  color: var(--color-text-muted);
+}
+
+/* ─── Share button ────────────────────────────────────────── */
+
+.card__share {
+  margin-bottom: clamp(16px, 4vh, 24px);
+}
+
+.btn-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--size-label);
+  font-weight: 300;
+  letter-spacing: 0.10em;
+  text-transform: lowercase;
+  color: var(--color-text-muted);
+  transition: color 0.2s ease, opacity 0.2s ease;
+  opacity: 0.8;
+  padding: 6px 0;
+}
+
+.btn-share:hover,
+.btn-share:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+/* ─── Card footer: wordmark block ─────────────────────────── */
+
+.card__footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.wordmark-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wordmark {
+  font-size: clamp(13px, 3.2vw, 16px);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+}
+
+.wordmark-sub {
+  font-size: var(--size-wordmark-sm);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+}
+
+/* ─── Wordmark / idle side ────────────────────────────────── */
+
+.wordmark-idle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.wordmark-idle__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.wordmark-idle__line {
+  font-size: var(--size-wordmark-lg);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.0;
+  color: var(--color-text);
+  display: block;
+}
+
+.wordmark-idle__sub {
+  font-size: clamp(13px, 3.2vw, 17px);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  text-transform: lowercase;
+  margin-top: clamp(10px, 2.5vw, 18px);
+  display: block;
+}
+
+.wordmark-idle__url {
+  font-size: var(--size-wordmark-sm);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* ─── Load animation ──────────────────────────────────────── */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateY(0);
+  }
+}
+
+#cardFront {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ─── Accessibility ───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Landscape guard ─────────────────────────────────────── */
+/* If someone rotates to landscape on a small device, keep it usable */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --pad-top: max(env(safe-area-inset-top), 16px);
+    --pad-bot: max(env(safe-area-inset-bottom), 12px);
+    --size-name: clamp(20px, 5vw, 28px);
+    --size-wordmark-lg: clamp(36px, 9vw, 52px);
+  }
+
+  .card__controls {
+    margin-bottom: 12px;
+  }
+}

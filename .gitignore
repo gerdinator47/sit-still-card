@@ -1,0 +1,17 @@
+# OS / system
+desktop.ini
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code settings (local only)
+.claude/
+
+# PowerShell helper scripts (not needed in the deployed site)
+icons/generate-icons.ps1
+
+# Font README (internal docs, optional to include)
+# fonts/README.txt
