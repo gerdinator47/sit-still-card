@@ -2,6 +2,7 @@
 
 // ── vCard ─────────────────────────────────────────────────────
 
+// Full vCard with em-dash — used by the share button (no QR encoding issues)
 const VCARD = [
   'BEGIN:VCARD',
   'VERSION:3.0',
@@ -15,11 +16,19 @@ const VCARD = [
   'END:VCARD',
 ].join('\r\n');
 
-// MECARD format — shorter than vCard, natively parsed by phone cameras.
-// Scan popup shows the contact name instead of a URL.
-// MECARD spec doesn't support ORG, so company goes in NOTE.
-// Uses plain hyphen (not em-dash) because qrcodejs can't encode multi-byte UTF-8.
-const MECARD = 'MECARD:N:DiBernardo,Will;TEL:+12014520547;EMAIL:will@sit-still.com;URL:https://sit-still.com;NOTE:Sit-Still Landscape Architecture;;';
+// QR-safe vCard — plain hyphen only (qrcodejs can't encode multi-byte UTF-8).
+// Embedded directly in the QR so scanners prompt "Add Contact" with all fields.
+const VCARD_QR = [
+  'BEGIN:VCARD',
+  'VERSION:3.0',
+  'FN:Will DiBernardo',
+  'N:DiBernardo;Will;;;',
+  'ORG:Sit-Still Landscape Architecture',
+  'TEL:+12014520547',
+  'EMAIL:will@sit-still.com',
+  'URL:https://sit-still.com',
+  'END:VCARD',
+].join('\r\n');
 
 // ── Service worker ────────────────────────────────────────────
 
@@ -89,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var dark = body.classList.contains('dark');
       new QRCode(qrcodeEl, {
-        text:         MECARD,
+        text:         VCARD_QR,
         width:        w,
         height:       w,
         colorDark:    dark ? '#f0f0f0' : '#111111',
