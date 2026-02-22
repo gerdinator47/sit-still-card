@@ -82,11 +82,11 @@ button {
 
 .card {
   position: fixed;
-  /* Canvas: full width, stops above the 49px Safari bar */
+  /* Canvas: full width, stops above Safari bar / home indicator */
   top: 0;
   left: 0;
   right: 0;
-  bottom: 49px;
+  bottom: env(safe-area-inset-bottom, 0px);
   background-color: var(--bg);
   transition: background-color 0.3s ease;
   /* Subtle tilt parallax driven by JS custom properties */
@@ -165,8 +165,8 @@ button {
 */
 
 .bottom-bar {
-  position: fixed;
-  bottom: calc(49px + 16px);   /* above Safari bar with breathing room */
+  position: absolute;
+  bottom: 16px;     /* 16px above bottom of .card (which already stops above Safari bar) */
   left: 6.5vw;
   right: 6.5vw;
   display: flex;

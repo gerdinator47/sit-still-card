@@ -72,15 +72,17 @@ btnTheme.addEventListener('click', toggleTheme);
 const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/will-dibernardo.vcf';
 
 function buildQRCode() {
+  // Wait for QRCode library to load
   if (typeof QRCode === 'undefined') { setTimeout(buildQRCode, 80); return; }
+
+  // Wait for the element to have a real size (layout must complete first)
+  const rect = qrcodeEl.getBoundingClientRect();
+  if (rect.width < 1) { setTimeout(buildQRCode, 50); return; }
 
   qrcodeEl.innerHTML = '';
 
   const dark = body.classList.contains('dark');
-
-  // Render at the element's pixel size for crispness.
-  const size = qrcodeEl.getBoundingClientRect();
-  const px   = Math.round(size.width || 161);
+  const px   = Math.round(rect.width);
 
   new QRCode(qrcodeEl, {
     text:         VCF_URL,
@@ -90,12 +92,6 @@ function buildQRCode() {
     colorLight:   dark ? '#111111' : '#ffffff',
     correctLevel: QRCode.CorrectLevel.L,
   });
-}
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', buildQRCode);
-} else {
-  buildQRCode();
 }
 
 // ── Share ─────────────────────────────────────────────────────
