@@ -17,9 +17,9 @@ const VCARD = [
 
 // MECARD format — shorter than vCard, natively parsed by phone cameras.
 // Scan popup shows the contact name instead of a URL.
-// Note: uses plain hyphen (not em-dash) because qrcodejs chokes on multi-byte UTF-8.
-// The phone's contact app will display the ORG as saved.
-const MECARD = 'MECARD:N:DiBernardo,Will;ORG:Sit-Still Landscape Architecture;TEL:+12014520547;EMAIL:will@sit-still.com;URL:https://sit-still.com;ADR:Los Angeles, CA;;';
+// MECARD spec doesn't support ORG, so company goes in NOTE.
+// Uses plain hyphen (not em-dash) because qrcodejs can't encode multi-byte UTF-8.
+const MECARD = 'MECARD:N:DiBernardo,Will;TEL:+12014520547;EMAIL:will@sit-still.com;URL:https://sit-still.com;NOTE:Sit-Still Landscape Architecture;;';
 
 // ── Service worker ────────────────────────────────────────────
 
