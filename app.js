@@ -7,7 +7,7 @@ const VCARD = [
   'VERSION:3.0',
   'FN:Will DiBernardo',
   'N:DiBernardo;Will;;;',
-  'ORG:Sit-Still Landscape Architecture',
+  'ORG:Sit\u2014Still Landscape Architecture',
   'TEL;TYPE=CELL:+12014520547',
   'EMAIL;TYPE=INTERNET:will@sit-still.com',
   'URL:https://sit-still.com',
@@ -17,7 +17,7 @@ const VCARD = [
 
 // MECARD format — shorter than vCard, natively parsed by phone cameras.
 // Scan popup shows the contact name instead of a URL.
-const MECARD = 'MECARD:N:DiBernardo,Will;ORG:Sit-Still Landscape Architecture;TEL:+12014520547;EMAIL:will@sit-still.com;URL:https\\://sit-still.com;ADR:Los Angeles, CA;;';
+const MECARD = 'MECARD:N:DiBernardo,Will;ORG:Sit\u2014Still Landscape Architecture;TEL:+12014520547;EMAIL:will@sit-still.com;URL:https://sit-still.com;ADR:Los Angeles, CA;;';
 
 // ── Service worker ────────────────────────────────────────────
 
