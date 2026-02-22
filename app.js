@@ -65,6 +65,9 @@ applyTheme(getInitialTheme());
 btnTheme.addEventListener('click', toggleTheme);
 
 // ── QR code ───────────────────────────────────────────────────
+// Encodes the website URL only (not the full vCard) so the QR is
+// as simple as possible — Version 2 (25×25 modules) vs Version 7+.
+// The share button handles full contact delivery.
 
 function buildQRCode() {
   if (typeof QRCode === 'undefined') { setTimeout(buildQRCode, 80); return; }
@@ -74,12 +77,11 @@ function buildQRCode() {
   const dark = body.classList.contains('dark');
 
   // Render at the element's pixel size for crispness.
-  // The CSS makes the canvas fill the container via width/height 100%.
   const size = qrcodeEl.getBoundingClientRect();
-  const px   = Math.round(size.width || 215);
+  const px   = Math.round(size.width || 161);
 
   new QRCode(qrcodeEl, {
-    text:         VCARD,
+    text:         'https://sit-still.com',
     width:        px,
     height:       px,
     colorDark:    dark ? '#f0f0f0' : '#111111',

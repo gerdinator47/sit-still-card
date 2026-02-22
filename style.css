@@ -105,14 +105,16 @@ button {
 
 /* ── Zone 1: Wordmark ───────────────────────────────────────── */
 /*
-  Shifted up ~10vh from original 10vh spec → now 0vh
+  Top: 5vh (moved down 5% from previous 0vh)
   Left edge: 25.6px (content margin)
   Font: Inter Medium 500, 109px, line-height 0.93
+  Two lines × 109px × 0.93 ≈ 203px tall ≈ 25.3vh on 803px canvas
+  Wordmark bottom ≈ 5 + 25.3 = 30.3vh
 */
 
 .wordmark {
   position: fixed;
-  top: 0vh;         /* shifted up ~10vh from original 10vh */
+  top: 5vh;
   left: 6.5vw;      /* 25.6px @ 393px */
   right: 6.5vw;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -130,17 +132,19 @@ button {
 
 /* ── Zone 2: QR code square ─────────────────────────────────── */
 /*
-  Size: 47.25% of content width (original 63% × 75% reduction)
-  Top edge: shifted up ~10vh → 32vh
+  Equal gap above and below the QR:
+    Gap above = QR top − wordmark bottom = 37vh − 30.3vh ≈ 6.7vh
+    QR size   = 47.25% of content width ≈ 20vh on 803px canvas
+    QR bottom ≈ 37 + 20 = 57vh
+    Name top  = 57 + 6.7 ≈ 64vh  (set in Zone 3)
   Left edge: 25.6px (content margin)
   No border.
 */
 
 .qr-zone {
   position: fixed;
-  top: 32vh;        /* shifted up ~10vh from original 42vh */
+  top: 37vh;
   left: 6.5vw;      /* 25.6px */
-  /* Width and height: 47.25% of content column (63% × 75%) */
   width: calc(0.4725 * (100vw - 2 * 6.5vw));
   height: calc(0.4725 * (100vw - 2 * 6.5vw));
   overflow: hidden;
@@ -210,16 +214,19 @@ body.light .icon-sun  { display: none; }
 
 /* ── Zone 3: Contact name block ─────────────────────────────── */
 /*
-  Top edge: shifted up ~10vh → 67vh
+  Top edge: QR bottom (57vh) + gap above QR (6.7vh) ≈ 64vh
+  Equal spacing above and below the QR code.
   Font: 25px, line-height 1.25
   "Will DiBernardo" → weight 500 (Medium)
   ", RLA, ASLA" inline → weight 400 (Regular)
   "Founding Principal" below → weight 400
+  Name block height: 2 lines × 25px × 1.25 = 62.5px ≈ 7.8vh
+  Name block bottom ≈ 64 + 7.8 = 71.8vh
 */
 
 .name-block {
   position: fixed;
-  top: 67vh;        /* shifted up ~10vh from original 77vh */
+  top: 64vh;
   left: 6.5vw;
   right: 6.5vw;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -243,14 +250,14 @@ body.light .icon-sun  { display: none; }
 
 /* ── Zone 4: Contact body block ─────────────────────────────── */
 /*
-  Top edge: shifted up ~10vh from 83.5vh, then extra gap added
-  to increase spacing below "Founding Principal" → 79vh
+  Top edge: name-block bottom (71.8vh) + small tight gap ≈ 75vh
+  Slightly tighter than before — email sits close under Founding Principal.
   Font: Inter Regular 400, 25px, line-height 1.3
 */
 
 .body-block {
   position: fixed;
-  top: 79vh;        /* shifted up ~10vh, plus larger gap from name-block */
+  top: 75vh;
   left: 6.5vw;
   right: 6.5vw;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
