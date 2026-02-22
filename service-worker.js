@@ -3,12 +3,13 @@
  * Provides offline support via a cache-first strategy for app shell assets.
  */
 
-const CACHE_NAME = 'sit-still-v10';
+const CACHE_NAME = 'sit-still-v11';
 
 // Assets to pre-cache on install (app shell)
 const PRECACHE_ASSETS = [
   './',
   './index.html',
+  './contact.html',
   './style.css',
   './app.js',
   './manifest.json',

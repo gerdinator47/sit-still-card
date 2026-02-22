@@ -8,7 +8,6 @@ const VCARD = [
   'FN:Will DiBernardo',
   'N:DiBernardo;Will;;;',
   'ORG:Sit-Still Landscape Architecture',
-  'TITLE:Founding Principal',
   'TEL;TYPE=CELL:+12014520547',
   'EMAIL;TYPE=INTERNET:will@sit-still.com',
   'URL:https://sit-still.com',
@@ -16,7 +15,7 @@ const VCARD = [
   'END:VCARD',
 ].join('\r\n');
 
-const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/will-dibernardo.vcf';
+const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/contact.html';
 
 // ── Service worker ────────────────────────────────────────────
 
