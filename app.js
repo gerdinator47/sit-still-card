@@ -15,7 +15,9 @@ const VCARD = [
   'END:VCARD',
 ].join('\r\n');
 
-const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/contact.html';
+// MECARD format — shorter than vCard, natively parsed by phone cameras.
+// Scan popup shows the contact name instead of a URL.
+const MECARD = 'MECARD:N:DiBernardo,Will;ORG:Sit-Still Landscape Architecture;TEL:+12014520547;EMAIL:will@sit-still.com;URL:https\\://sit-still.com;ADR:Los Angeles, CA;;';
 
 // ── Service worker ────────────────────────────────────────────
 
@@ -85,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var dark = body.classList.contains('dark');
       new QRCode(qrcodeEl, {
-        text:         VCF_URL,
+        text:         MECARD,
         width:        w,
         height:       w,
         colorDark:    dark ? '#f0f0f0' : '#111111',
