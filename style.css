@@ -1,68 +1,71 @@
-/* ============================================================
+/* ══════════════════════════════════════════════════════════════
    Sit-Still Digital Business Card
-   ============================================================
-   Type scale derived from 2"×3.5" card at 72pt/inch (144pt wide)
-   scaled to 390px iPhone viewport — scale factor 2.708×.
-   All vw values are the px value ÷ 390 × 100.
-   ============================================================ */
+   Design values precisely tuned for iPhone 15 Pro (393×852px).
+   Preview at 236×482px (60% scale). Scale factor ×1.6653 (h/v).
 
-@font-face {
-  font-family: 'Inter';
-  src: url('fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: block; /* block prevents flash of wrong-weight text */
-}
+   Layout strategy: fixed positioning for each zone so that
+   vh-based tops land exactly where designed, independent of
+   content reflow. The card background is a single fixed layer.
+   ══════════════════════════════════════════════════════════════ */
 
-/* ─── Tokens ──────────────────────────────────────────────── */
+/* ── Tokens ─────────────────────────────────────────────────── */
 
 :root {
-  /* Light mode (default) */
-  --bg:          #ffffff;
-  --text:        #0f0f0f;
-  --text-sub:    #0f0f0f;       /* same on light — contact details full black */
-  --rule:        rgba(0, 0, 0, 0.15);
+  /* Colours — light mode default */
+  --bg:       #ffffff;
+  --text:     #0f0f0f;
+  --muted:    rgba(15, 15, 15, 0.45);
+  --rule:     rgba(15, 15, 15, 0.15);
 
-  /* Layout */
-  --margin-x:    6.5vw;         /* ~6–8% of card width */
-  --pad-y:       max(env(safe-area-inset-top), 11vw); /* top & bottom equal */
-  --pad-top:     var(--pad-y);
-  --pad-bot:     max(env(safe-area-inset-bottom), 11vw);
-
-  /* Section gap — used in two places so both gaps are identical:
-     1. Between "los angeles" and "Will DiBernardo"
-     2. Between the phone number and the QR code (via the rule margins) */
-  --section-gap: 8.5vw;
+  /* Margins */
+  --margin-h:       6.5vw;    /* left + right, symmetric            */
+  --margin-top:     4.5vh;
+  --margin-bottom:  6vh;
 
   /* Wordmark */
-  --wm-size:     31.3vw;        /* 122px @ 390px viewport */
-  --wm-lh:       27.7vw;        /* 108px — intentionally tighter than size */
+  --wm-font-size:   27.8vw;   /* 109.1px ÷ 393px × 100             */
+  --wm-line-height: 0.93;
+  --wm-font-weight: 500;
+  --wm-top:         10vh;
 
-  /* Name */
-  --name-size:   8.2vw;         /* 32px @ 390px */
+  /* QR code */
+  --qr-size:         63%;     /* % of content width                 */
+  --qr-top:          42vh;
+  --qr-border-width: 2.5px;
 
-  /* Body / contact */
-  --body-size:   4.1vw;         /* 16px @ 390px */
-  --body-lh:     6.2vw;         /* 24px @ 390px */
+  /* Contact — name */
+  --name-font-size:   6.35vw; /* 25.0px ÷ 393px × 100              */
+  --name-font-weight: 500;
+  --name-line-height: 1.25;
+  --name-top:         77vh;
+
+  /* Contact — body */
+  --body-font-size:   6.35vw; /* 25.0px ÷ 393px × 100              */
+  --body-line-height: 1.3;
+  --body-gap:         6.77vw; /* 26.6px ÷ 393px × 100              */
+  --body-top:         83.5vh;
+
+  /* Credentials weight */
+  --cred-font-weight: 400;
 
   /* Transitions */
   --fade: color 0.35s ease, background-color 0.35s ease,
           border-color 0.35s ease, opacity 0.35s ease;
 
-  /* Tilt parallax (set by JS) */
+  /* Tilt (set by JS) */
   --tilt-x: 0deg;
   --tilt-y: 0deg;
 }
 
 /* Dark mode */
 body.dark {
-  --bg:       #0f0f0f;
-  --text:     #f5f3ef;
-  --text-sub: #f5f3ef;
-  --rule:     rgba(245, 243, 239, 0.15);
+  --bg:    #0f0f0f;
+  --text:  #f5f3ef;
+  --muted: rgba(245, 243, 239, 0.45);
+  --rule:  rgba(245, 243, 239, 0.15);
 }
 
-/* ─── Reset ───────────────────────────────────────────────── */
+/* ── Reset ──────────────────────────────────────────────────── */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -73,7 +76,7 @@ body.dark {
 html, body {
   height: 100%;
   overflow: hidden;
-  touch-action: manipulation; /* kills double-tap zoom */
+  touch-action: manipulation;
 }
 
 body {
@@ -107,14 +110,14 @@ button {
   touch-action: manipulation;
 }
 
-/* ─── Install prompt ──────────────────────────────────────── */
+/* ── Install prompt ─────────────────────────────────────────── */
 
 .install-prompt {
   position: fixed;
   top: max(env(safe-area-inset-top), 12px);
-  left: var(--margin-x);
-  right: var(--margin-x);
-  z-index: 100;
+  left: var(--margin-h);
+  right: var(--margin-h);
+  z-index: 200;
   background-color: var(--text);
   color: var(--bg);
   padding: 10px 14px;
@@ -122,14 +125,13 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity 0.4s ease, transform 0.4s ease;
   pointer-events: none;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  line-height: 1.5;
 }
 
 .install-prompt.visible {
@@ -146,16 +148,12 @@ button {
   color: var(--bg);
 }
 
-/* ─── Card ────────────────────────────────────────────────── */
+/* ── Card background ────────────────────────────────────────── */
 
 .card {
   position: fixed;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  padding: var(--pad-top) var(--margin-x) var(--pad-bot);
   background-color: var(--bg);
-  color: var(--text);
   transition: var(--fade), transform 0.22s ease-out;
   will-change: transform;
   transform:
@@ -166,37 +164,27 @@ button {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: perspective(900px) translateY(8px); }
-  to   { opacity: 1; transform: perspective(900px) translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* ─── Zone 1: Wordmark ────────────────────────────────────── */
-/*
-  Top margin above wordmark ≈ cap-height of the letters.
-  Inter Medium at 31.3vw has a cap-height of ~0.73 × font-size ≈ 22.8vw.
-  We're using --pad-top (≈ 6.5vw) for the safe-area and adding extra
-  margin-top here to reach that ~1× cap-height target.
-*/
+/* ── Wordmark ───────────────────────────────────────────────── */
 
 .zone--wordmark {
-  flex: 0 0 auto;
-  /* Same token as the rule margins — makes the gap from "los angeles"
-     to "Will DiBernardo" visually equal to the gap from phone → QR */
-  margin-bottom: var(--section-gap);
+  position: fixed;
+  top: var(--wm-top);
+  left: var(--margin-h);
+  right: var(--margin-h);
 }
 
 .wordmark {
-  display: flex;
-  flex-direction: column;
-  /* Spec: line-height 108px (27.7vw) on 122px (31.3vw) text */
-  line-height: var(--wm-lh);
-  margin-bottom: clamp(10px, 2.8vw, 16px); /* gap before "landscape architecture" */
+  line-height: var(--wm-line-height);
 }
 
 .wordmark__line {
   display: block;
-  font-size: var(--wm-size);
-  font-weight: 500;   /* Inter Medium — exactly per spec */
+  font-size: var(--wm-font-size);
+  font-weight: var(--wm-font-weight);
   letter-spacing: -0.01em;
   color: var(--text);
   transition: color 0.35s ease;
@@ -204,129 +192,85 @@ button {
 
 .wordmark__sub {
   display: block;
-  font-size: var(--body-size);
-  line-height: var(--body-lh);
-  font-weight: 400;   /* Regular */
+  font-size: var(--body-font-size);
+  font-weight: 400;
+  line-height: var(--body-line-height);
   letter-spacing: 0;
-  color: var(--text-sub);
-  opacity: 0.5;
-  transition: color 0.35s ease, opacity 0.35s ease;
-}
-
-/* ─── Zone 2: Contact info ────────────────────────────────── */
-
-.zone--contact {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.name {
-  font-size: var(--name-size);
-  font-weight: 500;   /* Medium */
-  letter-spacing: -0.01em;
-  line-height: 1.1;
   color: var(--text);
-  transition: color 0.35s ease;
-  margin-bottom: clamp(6px, 1.5vw, 10px);
+  opacity: 0.45;
+  transition: color 0.35s ease, opacity 0.35s ease;
+  /* First sub line gets a gap above to separate from wordmark */
 }
 
-.contact-details {
-  display: flex;
-  flex-direction: column;
-  /* line-height from spec: 24px / 16px = 1.5 */
+.wordmark__sub:first-of-type {
+  margin-top: 2.5vh;
 }
 
-.contact-line {
-  display: block;
-  font-size: var(--body-size);
-  line-height: var(--body-lh);
-  font-weight: 400;   /* Regular */
-  letter-spacing: 0;
-  color: var(--text-sub);
-  -webkit-user-select: text;
-  user-select: text;
-  transition: color 0.35s ease;
+/* ── QR code ────────────────────────────────────────────────── */
+
+.zone--qr {
+  position: fixed;
+  top: var(--qr-top);
+  left: var(--margin-h);
+  /* Width = 63% of content area */
+  width: calc(var(--qr-size) * (100vw - 2 * var(--margin-h)) / 100);
 }
 
-/* Hairline rule — margins use --section-gap so the visual distance
-   from the last contact line to the top of the QR square equals
-   the distance from "los angeles" to "Will DiBernardo" */
-.rule {
+.qr-wrap {
   width: 100%;
-  height: 1px;
-  background-color: var(--rule);
-  margin: var(--section-gap) 0;
-  flex-shrink: 0;
-  transition: background-color 0.35s ease;
-}
-
-/* ─── Zone 3: Action zone (two squares) ──────────────────── */
-/*
-  Two equal squares side by side, each ≈ 45% of content width.
-  Content width = viewport − 2 × margin-x.
-  Gap between = 100% − 2×45% = 10% of content width.
-*/
-
-.zone--actions {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
-  gap: 3vw;                   /* gap between the two squares */
-}
-
-.action-square {
-  flex: 1 1 0;
-  /* Square: height = width. Use aspect-ratio. */
   aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+  /* Hairline border matching the rule colour */
+  outline: var(--qr-border-width) solid var(--rule);
+  outline-offset: -1px;
+  transition: outline-color 0.35s ease;
 }
 
-/* Left square: QR code fills it cleanly */
-.action-square--qr {
-  background-color: var(--bg);
-  transition: background-color 0.35s ease;
-}
-
-.action-square--qr canvas,
-.action-square--qr img {
+.qr-wrap canvas,
+.qr-wrap img {
   width: 100% !important;
   height: 100% !important;
   display: block;
 }
 
-/* Right square: control cluster */
-.action-square--controls {
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: clamp(8px, 2vw, 14px);
-  gap: clamp(8px, 2vw, 14px);
+.qr-label {
+  margin-top: 1.5vh;
+  font-size: 3vw;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  opacity: 0.4;
+  transition: color 0.35s ease, opacity 0.35s ease;
 }
 
-/* ─── Controls inside right square ───────────────────────── */
+/* ── Controls (theme + share) — right of QR ────────────────── */
+/*
+  Sits in the same horizontal band as the QR, right-aligned.
+  Gap between QR right edge and controls left edge = 3vw.
+*/
 
-.ctrl-group {
+.zone--controls {
+  position: fixed;
+  top: var(--qr-top);
+  /* Left edge = margin-h + qr-width + gap */
+  left: calc(var(--margin-h) + var(--qr-size) * (100vw - 2 * var(--margin-h)) / 100 + 3vw);
+  right: var(--margin-h);
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 2.5vw, 18px);
-  width: 100%;
+  gap: 2.5vh;
 }
 
 .ctrl-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: clamp(9px, 2.3vw, 12px);
+  gap: 1.8vw;
+  font-size: 3vw;
   font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--text-sub);
-  opacity: 0.6;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  opacity: 0.5;
   transition: opacity 0.2s ease, color 0.35s ease;
-  width: 100%;
+  white-space: nowrap;
 }
 
 .ctrl-btn:hover,
@@ -337,32 +281,77 @@ button {
 
 .ctrl-btn svg {
   flex-shrink: 0;
+  width: 3.5vw;
+  height: 3.5vw;
 }
 
-/* Sun shown in dark mode (tap to go light); moon shown in light mode */
 body.dark  .icon-moon { display: none; }
 body.light .icon-sun  { display: none; }
 
-/* Bottom spacer — pushes nothing, but ensures bottom padding is felt */
-.zone--bottom-pad {
-  flex: 1 1 auto;
-  min-height: 0;
+/* ── Hairline rule ──────────────────────────────────────────── */
+
+.rule {
+  position: fixed;
+  /* Sits between phone number (~body-top + ~4 lines) and QR.
+     Visually placed just above the QR top, offset by a small gap. */
+  top: calc(var(--qr-top) - 3vh);
+  left: var(--margin-h);
+  right: var(--margin-h);
+  height: 1px;
+  background-color: var(--rule);
+  transition: background-color 0.35s ease;
 }
 
-/* ─── Reduced motion ──────────────────────────────────────── */
+/* ── Contact — name block ───────────────────────────────────── */
+
+.zone--contact {
+  position: fixed;
+  top: var(--name-top);
+  left: var(--margin-h);
+  right: var(--margin-h);
+}
+
+.name {
+  font-size: var(--name-font-size);
+  font-weight: var(--name-font-weight);
+  line-height: var(--name-line-height);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  transition: color 0.35s ease;
+}
+
+/* ── Contact — body lines ───────────────────────────────────── */
+
+.zone--body {
+  position: fixed;
+  top: var(--body-top);
+  left: var(--margin-h);
+  right: var(--margin-h);
+  /* gap between name block and body = --body-gap handled by top offset */
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-line {
+  display: block;
+  font-size: var(--body-font-size);
+  font-weight: var(--cred-font-weight);
+  line-height: var(--body-line-height);
+  letter-spacing: 0;
+  color: var(--text);
+  transition: color 0.35s ease;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-/* ─── Clamp wordmark on very large screens ────────────────── */
-
-@media (min-width: 500px) {
-  :root {
-    --wm-size: clamp(122px, 31.3vw, 160px);
-    --wm-lh:   clamp(108px, 27.7vw, 140px);
   }
 }
