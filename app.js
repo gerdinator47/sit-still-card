@@ -75,19 +75,18 @@ function buildQRCode() {
   // Wait for QRCode library to load
   if (typeof QRCode === 'undefined') { setTimeout(buildQRCode, 80); return; }
 
-  // Wait for the element to have a real size (layout must complete first)
-  const rect = qrcodeEl.getBoundingClientRect();
-  if (rect.width < 1) { setTimeout(buildQRCode, 50); return; }
+  // Wait for the element to have a real rendered size
+  const w = qrcodeEl.offsetWidth;
+  if (!w || w < 10) { setTimeout(buildQRCode, 100); return; }
 
   qrcodeEl.innerHTML = '';
 
   const dark = body.classList.contains('dark');
-  const px   = Math.round(rect.width);
 
   new QRCode(qrcodeEl, {
     text:         VCF_URL,
-    width:        px,
-    height:       px,
+    width:        w,
+    height:       w,
     colorDark:    dark ? '#f0f0f0' : '#111111',
     colorLight:   dark ? '#111111' : '#ffffff',
     correctLevel: QRCode.CorrectLevel.L,

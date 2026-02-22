@@ -1,27 +1,18 @@
 /* ══════════════════════════════════════════════════════════════
    Sit-Still Digital Business Card
-   Target: iPhone 15 Pro, 393×852px screen
-   Usable canvas: 393×803px (852 − 49px Safari bar)
 
-   All positions are fixed, calculated from spec pixel values:
-     top: Xpx  →  top: calc(X / 803 * 100vh)
-     left/width use px directly (viewport is fixed at ~393px)
+   .card is the full-screen container. Because it has a CSS
+   transform (for tilt parallax), all children use position:
+   absolute with percentage-based top values (% of .card height).
 
-   Horizontal margins: 25.6px each side (6.5% × 393)
-   Content column: 341.8px wide
+   Horizontal margins: 6.5% each side.
    ══════════════════════════════════════════════════════════════ */
-
-/* ── Google Fonts: Inter 400 + 500 only ─────────────────────── */
-/* Loaded via <link> in HTML — declaration here for reference   */
 
 /* ── Colour tokens ──────────────────────────────────────────── */
 
 :root {
   --bg:        #ffffff;
   --text:      #111111;
-  --qr-border: #111111;
-  --qr-dark:   #111111;
-  --qr-light:  #ffffff;
   --fade: background-color 0.3s ease, color 0.3s ease,
           border-color 0.3s ease, opacity 0.3s ease;
 }
@@ -29,9 +20,6 @@
 body.dark {
   --bg:        #111111;
   --text:      #f0f0f0;
-  --qr-border: #f0f0f0;
-  --qr-dark:   #f0f0f0;
-  --qr-light:  #111111;
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
@@ -78,18 +66,16 @@ button {
   touch-action: manipulation;
 }
 
-/* ── Card — full canvas background ─────────────────────────── */
+/* ── Card — full canvas ──────────────────────────────────────── */
 
 .card {
   position: fixed;
-  /* Canvas: full width, stops above Safari bar / home indicator */
   top: 0;
   left: 0;
   right: 0;
   bottom: env(safe-area-inset-bottom, 0px);
   background-color: var(--bg);
   transition: background-color 0.3s ease;
-  /* Subtle tilt parallax driven by JS custom properties */
   will-change: transform;
   transform:
     perspective(900px)
@@ -104,19 +90,12 @@ button {
 }
 
 /* ── Zone 1: Wordmark ───────────────────────────────────────── */
-/*
-  Top: 5vh (moved down 5% from previous 0vh)
-  Left edge: 25.6px (content margin)
-  Font: Inter Medium 500, 109px, line-height 0.93
-  Two lines × 109px × 0.93 ≈ 203px tall ≈ 25.3vh on 803px canvas
-  Wordmark bottom ≈ 5 + 25.3 = 30.3vh
-*/
 
 .wordmark {
-  position: fixed;
-  top: 5vh;
-  left: 6.5vw;      /* 25.6px @ 393px */
-  right: 6.5vw;
+  position: absolute;
+  top: 5%;
+  left: 6.5%;
+  right: 6.5%;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 109px;
   font-weight: 500;
@@ -131,49 +110,89 @@ button {
 }
 
 /* ── Zone 2: QR code square ─────────────────────────────────── */
-/*
-  Equal gap above and below the QR:
-    Gap above = QR top − wordmark bottom = 37vh − 30.3vh ≈ 6.7vh
-    QR size   = 47.25% of content width ≈ 20vh on 803px canvas
-    QR bottom ≈ 37 + 20 = 57vh
-    Name top  = 57 + 6.7 ≈ 64vh  (set in Zone 3)
-  Left edge: 25.6px (content margin)
-  No border.
-*/
 
 .qr-zone {
-  position: fixed;
-  top: 37vh;
-  left: 6.5vw;      /* 25.6px */
-  width: calc(0.4725 * (100vw - 2 * 6.5vw));
-  height: calc(0.4725 * (100vw - 2 * 6.5vw));
+  position: absolute;
+  top: 37%;
+  left: 6.5%;
+  width: calc(0.4725 * (100% - 2 * 6.5%));
+  height: 0;
+  /* Use padding-bottom to create a square based on width */
+  padding-bottom: calc(0.4725 * (100% - 2 * 6.5%));
   overflow: hidden;
 }
 
-/* QR canvas fills the square with no extra padding */
+/* QR canvas fills the square */
 .qr-zone canvas,
 .qr-zone img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100% !important;
   height: 100% !important;
   display: block;
 }
 
-/* ── Bottom bar — dark toggle | share | sit-still.com ───────── */
-/*
-  Fixed to the bottom of the usable canvas (above Safari bar).
-  Three items in a row: theme toggle, share button, website link.
-*/
+/* ── Zone 3: Contact name block ─────────────────────────────── */
+
+.name-block {
+  position: absolute;
+  top: 64%;
+  left: 6.5%;
+  right: 6.5%;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 25px;
+  line-height: 1.25;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+.name-block__line {
+  display: block;
+}
+
+.name-medium {
+  font-weight: 500;
+}
+
+.name-regular {
+  font-weight: 400;
+}
+
+/* ── Zone 4: Contact body block ─────────────────────────────── */
+
+.body-block {
+  position: absolute;
+  top: 75%;
+  left: 6.5%;
+  right: 6.5%;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text);
+  transition: color 0.3s ease;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.body-line {
+  display: block;
+}
+
+/* ── Bottom bar ─────────────────────────────────────────────── */
 
 .bottom-bar {
   position: absolute;
-  bottom: 16px;     /* 16px above bottom of .card (which already stops above Safari bar) */
-  left: 6.5vw;
-  right: 6.5vw;
+  bottom: 16px;
+  left: 6.5%;
+  right: 6.5%;
   display: flex;
   align-items: center;
   gap: 20px;
   color: var(--text);
   transition: color 0.3s ease;
+  z-index: 10;
 }
 
 .theme-toggle,
@@ -212,82 +231,13 @@ button {
 body.dark  .icon-moon { display: none; }
 body.light .icon-sun  { display: none; }
 
-/* ── Zone 3: Contact name block ─────────────────────────────── */
-/*
-  Top edge: QR bottom (57vh) + gap above QR (6.7vh) ≈ 64vh
-  Equal spacing above and below the QR code.
-  Font: 25px, line-height 1.25
-  "Will DiBernardo" → weight 500 (Medium)
-  ", RLA, ASLA" inline → weight 400 (Regular)
-  "Founding Principal" below → weight 400
-  Name block height: 2 lines × 25px × 1.25 = 62.5px ≈ 7.8vh
-  Name block bottom ≈ 64 + 7.8 = 71.8vh
-*/
-
-.name-block {
-  position: fixed;
-  top: 64vh;
-  left: 6.5vw;
-  right: 6.5vw;
-  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 25px;
-  line-height: 1.25;
-  color: var(--text);
-  transition: color 0.3s ease;
-}
-
-.name-block__line {
-  display: block;
-}
-
-.name-medium {
-  font-weight: 500;
-}
-
-.name-regular {
-  font-weight: 400;
-}
-
-/* ── Zone 4: Contact body block ─────────────────────────────── */
-/*
-  Top edge: name-block bottom (71.8vh) + small tight gap ≈ 75vh
-  Slightly tighter than before — email sits close under Founding Principal.
-  Font: Inter Regular 400, 25px, line-height 1.3
-*/
-
-.body-block {
-  position: fixed;
-  top: 75vh;
-  left: 6.5vw;
-  right: 6.5vw;
-  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 25px;
-  font-weight: 400;
-  line-height: 1.3;
-  color: var(--text);
-  transition: color 0.3s ease;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.body-block a {
-  color: inherit;
-  text-decoration: none;
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.body-line {
-  display: block;
-}
-
 /* ── Install prompt ─────────────────────────────────────────── */
 
 .install-prompt {
   position: fixed;
   top: 0;
-  left: 6.5vw;
-  right: 6.5vw;
+  left: 6.5%;
+  right: 6.5%;
   z-index: 200;
   background-color: var(--text);
   color: var(--bg);
