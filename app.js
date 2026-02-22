@@ -65,9 +65,11 @@ applyTheme(getInitialTheme());
 btnTheme.addEventListener('click', toggleTheme);
 
 // ── QR code ───────────────────────────────────────────────────
-// Encodes the website URL only (not the full vCard) so the QR is
-// as simple as possible — Version 2 (25×25 modules) vs Version 7+.
-// The share button handles full contact delivery.
+// Encodes the hosted .vcf URL — phones scan and import the full
+// contact directly. URL is short enough for a Version 3 QR
+// (~29×29 modules) vs the raw vCard text (Version 7+, 45×45).
+
+const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/will-dibernardo.vcf';
 
 function buildQRCode() {
   if (typeof QRCode === 'undefined') { setTimeout(buildQRCode, 80); return; }
@@ -81,7 +83,7 @@ function buildQRCode() {
   const px   = Math.round(size.width || 161);
 
   new QRCode(qrcodeEl, {
-    text:         'https://sit-still.com',
+    text:         VCF_URL,
     width:        px,
     height:       px,
     colorDark:    dark ? '#f0f0f0' : '#111111',

@@ -3,7 +3,7 @@
  * Provides offline support via a cache-first strategy for app shell assets.
  */
 
-const CACHE_NAME = 'sit-still-v6';
+const CACHE_NAME = 'sit-still-v7';
 
 // Assets to pre-cache on install (app shell)
 const PRECACHE_ASSETS = [
@@ -13,6 +13,7 @@ const PRECACHE_ASSETS = [
   './app.js',
   './manifest.json',
   './qrcode.min.js',
+  './will-dibernardo.vcf',
   './icons/icon-192.png',
   './icons/icon-512.png',
   // Inter Variable font (covers all weights in a single file)
