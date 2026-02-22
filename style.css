@@ -116,18 +116,12 @@ button {
   top: 37%;
   left: 6.5%;
   width: calc(0.4725 * (100% - 2 * 6.5%));
-  height: 0;
-  /* Use padding-bottom to create a square based on width */
-  padding-bottom: calc(0.4725 * (100% - 2 * 6.5%));
+  aspect-ratio: 1;
   overflow: hidden;
 }
 
-/* QR canvas fills the square */
 .qr-zone canvas,
 .qr-zone img {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100% !important;
   height: 100% !important;
   display: block;

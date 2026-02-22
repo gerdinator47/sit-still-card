@@ -16,160 +16,174 @@ const VCARD = [
   'END:VCARD',
 ].join('\r\n');
 
+const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/will-dibernardo.vcf';
+
 // ── Service worker ────────────────────────────────────────────
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  window.addEventListener('load', function () {
     navigator.serviceWorker.register('./service-worker.js')
-      .catch(err => console.warn('SW:', err));
+      .catch(function (err) { console.warn('SW:', err); });
   });
 }
 
-// ── DOM refs ──────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────
+// Wait for the DOM to be fully parsed before touching anything.
 
-const body           = document.body;
-const card           = document.getElementById('card');
-const qrcodeEl       = document.getElementById('qrcode');
-const btnTheme       = document.getElementById('btnTheme');
-const themeLabel     = document.getElementById('themeLabel');
-const btnShare       = document.getElementById('btnShare');
-const installPrompt  = document.getElementById('installPrompt');
-const dismissPrompt  = document.getElementById('dismissPrompt');
-const themeColorMeta = document.getElementById('theme-color-meta');
+document.addEventListener('DOMContentLoaded', function () {
 
-// ── Theme ─────────────────────────────────────────────────────
+  var body           = document.body;
+  var card           = document.getElementById('card');
+  var qrcodeEl       = document.getElementById('qrcode');
+  var btnTheme       = document.getElementById('btnTheme');
+  var themeLabel     = document.getElementById('themeLabel');
+  var btnShare       = document.getElementById('btnShare');
+  var installPrompt  = document.getElementById('installPrompt');
+  var dismissPrompt  = document.getElementById('dismissPrompt');
+  var themeColorMeta = document.getElementById('theme-color-meta');
 
-function getInitialTheme() {
-  const saved = localStorage.getItem('ss-theme');
-  if (saved === 'dark' || saved === 'light') return saved;
-  return 'light';
-}
+  // ── Theme ───────────────────────────────────────────────────
 
-function applyTheme(theme) {
-  const dark = theme === 'dark';
-  body.classList.toggle('dark',  dark);
-  body.classList.toggle('light', !dark);
-  if (themeColorMeta) themeColorMeta.setAttribute('content', dark ? '#111111' : '#ffffff');
-  if (themeLabel)     themeLabel.textContent = dark ? 'light' : 'dark';
-  if (btnTheme)       btnTheme.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
-  buildQRCode();
-}
+  function applyTheme(theme) {
+    var dark = theme === 'dark';
+    body.classList.toggle('dark',  dark);
+    body.classList.toggle('light', !dark);
+    if (themeColorMeta) themeColorMeta.setAttribute('content', dark ? '#111111' : '#ffffff');
+    if (themeLabel)     themeLabel.textContent = dark ? 'light' : 'dark';
+    if (btnTheme)       btnTheme.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    buildQRCode();
+  }
 
-function toggleTheme() {
-  const next = body.classList.contains('dark') ? 'light' : 'dark';
-  localStorage.setItem('ss-theme', next);
-  applyTheme(next);
-}
+  function toggleTheme() {
+    var next = body.classList.contains('dark') ? 'light' : 'dark';
+    localStorage.setItem('ss-theme', next);
+    applyTheme(next);
+  }
 
-applyTheme(getInitialTheme());
-btnTheme.addEventListener('click', toggleTheme);
+  var saved = localStorage.getItem('ss-theme');
+  var initialTheme = (saved === 'dark' || saved === 'light') ? saved : 'light';
+  applyTheme(initialTheme);
 
-// ── QR code ───────────────────────────────────────────────────
-// Encodes the hosted .vcf URL — phones scan and import the full
-// contact directly. URL is short enough for a Version 3 QR
-// (~29×29 modules) vs the raw vCard text (Version 7+, 45×45).
+  if (btnTheme) btnTheme.addEventListener('click', toggleTheme);
 
-const VCF_URL = 'https://gerdinator47.github.io/sit-still-card/will-dibernardo.vcf';
+  // ── QR code ─────────────────────────────────────────────────
 
-function buildQRCode() {
-  // Wait for QRCode library to load
-  if (typeof QRCode === 'undefined') { setTimeout(buildQRCode, 80); return; }
-
-  // Wait for the element to have a real rendered size
-  const w = qrcodeEl.offsetWidth;
-  if (!w || w < 10) { setTimeout(buildQRCode, 100); return; }
-
-  qrcodeEl.innerHTML = '';
-
-  const dark = body.classList.contains('dark');
-
-  new QRCode(qrcodeEl, {
-    text:         VCF_URL,
-    width:        w,
-    height:       w,
-    colorDark:    dark ? '#f0f0f0' : '#111111',
-    colorLight:   dark ? '#111111' : '#ffffff',
-    correctLevel: QRCode.CorrectLevel.L,
-  });
-}
-
-// ── Share ─────────────────────────────────────────────────────
-
-btnShare.addEventListener('click', async () => {
-  const blob = new Blob([VCARD], { type: 'text/vcard' });
-  const file = new File([blob], 'will-dibernardo.vcf', { type: 'text/vcard' });
-
-  if (navigator.share) {
+  function buildQRCode() {
     try {
-      const canFile = navigator.canShare && navigator.canShare({ files: [file] });
-      if (canFile) {
-        await navigator.share({ files: [file], title: 'Will DiBernardo' });
-      } else {
-        await navigator.share({
-          title: 'Will DiBernardo — Sit-Still Landscape Architecture',
-          text:  'will@sit-still.com · 201.452.0547',
-          url:   'https://sit-still.com',
-        });
+      if (typeof QRCode === 'undefined') {
+        setTimeout(buildQRCode, 100);
+        return;
       }
+      if (!qrcodeEl) return;
+
+      var w = qrcodeEl.offsetWidth;
+      if (!w || w < 10) {
+        setTimeout(buildQRCode, 100);
+        return;
+      }
+
+      qrcodeEl.innerHTML = '';
+
+      var dark = body.classList.contains('dark');
+      new QRCode(qrcodeEl, {
+        text:         VCF_URL,
+        width:        w,
+        height:       w,
+        colorDark:    dark ? '#f0f0f0' : '#111111',
+        colorLight:   dark ? '#111111' : '#ffffff',
+        correctLevel: QRCode.CorrectLevel.L,
+      });
     } catch (err) {
-      if (err.name !== 'AbortError') console.warn('Share failed:', err);
+      console.warn('QR build error:', err);
     }
-  } else {
-    const url = URL.createObjectURL(blob);
-    const a   = Object.assign(document.createElement('a'), { href: url, download: 'will-dibernardo.vcf' });
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   }
-});
 
-// ── Install prompt ────────────────────────────────────────────
+  // ── Share ───────────────────────────────────────────────────
 
-function isStandalone() {
-  return window.matchMedia('(display-mode: standalone)').matches
-      || window.navigator.standalone === true;
-}
+  if (btnShare) {
+    btnShare.addEventListener('click', function () {
+      var blob = new Blob([VCARD], { type: 'text/vcard' });
+      var file = new File([blob], 'will-dibernardo.vcf', { type: 'text/vcard' });
 
-window.addEventListener('load', () => {
-  if (!isStandalone() && !sessionStorage.getItem('ss-prompt-dismissed')) {
-    setTimeout(() => installPrompt.classList.add('visible'), 1400);
+      if (navigator.share) {
+        var canFile = navigator.canShare && navigator.canShare({ files: [file] });
+        if (canFile) {
+          navigator.share({ files: [file], title: 'Will DiBernardo' })
+            .catch(function (err) { if (err.name !== 'AbortError') console.warn('Share failed:', err); });
+        } else {
+          navigator.share({
+            title: 'Will DiBernardo — Sit-Still Landscape Architecture',
+            text:  'will@sit-still.com · 201.452.0547',
+            url:   'https://sit-still.com',
+          }).catch(function (err) { if (err.name !== 'AbortError') console.warn('Share failed:', err); });
+        }
+      } else {
+        var url = URL.createObjectURL(blob);
+        var a   = document.createElement('a');
+        a.href = url;
+        a.download = 'will-dibernardo.vcf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    });
   }
-});
 
-dismissPrompt.addEventListener('click', () => {
-  installPrompt.classList.remove('visible');
-  sessionStorage.setItem('ss-prompt-dismissed', '1');
-});
+  // ── Install prompt ──────────────────────────────────────────
 
-// ── Tilt parallax ─────────────────────────────────────────────
-
-const TILT_MAX = 3;
-let tiltEnabled = false;
-
-function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
-
-function handleOrientation(e) {
-  const tx = clamp(((e.beta  ?? 0) - 90) / 30, -1, 1) * TILT_MAX;
-  const ty = clamp( (e.gamma ?? 0)        / 30, -1, 1) * TILT_MAX;
-  card.style.setProperty('--tilt-x', `${(-tx).toFixed(2)}deg`);
-  card.style.setProperty('--tilt-y', `${ty.toFixed(2)}deg`);
-}
-
-function enableTilt() {
-  if (tiltEnabled) return;
-  tiltEnabled = true;
-  window.addEventListener('deviceorientation', handleOrientation, { passive: true });
-}
-
-if (typeof DeviceOrientationEvent !== 'undefined') {
-  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    document.addEventListener('touchstart', () => {
-      DeviceOrientationEvent.requestPermission()
-        .then(s => { if (s === 'granted') enableTilt(); })
-        .catch(() => {});
-    }, { passive: true, once: true });
-  } else {
-    enableTilt();
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
   }
-}
+
+  window.addEventListener('load', function () {
+    if (!isStandalone() && !sessionStorage.getItem('ss-prompt-dismissed')) {
+      setTimeout(function () {
+        if (installPrompt) installPrompt.classList.add('visible');
+      }, 1400);
+    }
+  });
+
+  if (dismissPrompt) {
+    dismissPrompt.addEventListener('click', function () {
+      if (installPrompt) installPrompt.classList.remove('visible');
+      sessionStorage.setItem('ss-prompt-dismissed', '1');
+    });
+  }
+
+  // ── Tilt parallax ──────────────────────────────────────────
+
+  var TILT_MAX = 3;
+  var tiltEnabled = false;
+
+  function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
+
+  function handleOrientation(e) {
+    var tx = clamp(((e.beta  || 0) - 90) / 30, -1, 1) * TILT_MAX;
+    var ty = clamp( (e.gamma || 0)        / 30, -1, 1) * TILT_MAX;
+    if (card) {
+      card.style.setProperty('--tilt-x', (-tx).toFixed(2) + 'deg');
+      card.style.setProperty('--tilt-y', ty.toFixed(2) + 'deg');
+    }
+  }
+
+  function enableTilt() {
+    if (tiltEnabled) return;
+    tiltEnabled = true;
+    window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+  }
+
+  if (typeof DeviceOrientationEvent !== 'undefined') {
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      document.addEventListener('touchstart', function () {
+        DeviceOrientationEvent.requestPermission()
+          .then(function (s) { if (s === 'granted') enableTilt(); })
+          .catch(function () {});
+      }, { passive: true, once: true });
+    } else {
+      enableTilt();
+    }
+  }
+
+});
