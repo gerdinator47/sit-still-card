@@ -1,68 +1,37 @@
 /* ══════════════════════════════════════════════════════════════
    Sit-Still Digital Business Card
-   Design values precisely tuned for iPhone 15 Pro (393×852px).
-   Preview at 236×482px (60% scale). Scale factor ×1.6653 (h/v).
+   Target: iPhone 15 Pro, 393×852px screen
+   Usable canvas: 393×803px (852 − 49px Safari bar)
 
-   Layout strategy: fixed positioning for each zone so that
-   vh-based tops land exactly where designed, independent of
-   content reflow. The card background is a single fixed layer.
+   All positions are fixed, calculated from spec pixel values:
+     top: Xpx  →  top: calc(X / 803 * 100vh)
+     left/width use px directly (viewport is fixed at ~393px)
+
+   Horizontal margins: 25.6px each side (6.5% × 393)
+   Content column: 341.8px wide
    ══════════════════════════════════════════════════════════════ */
 
-/* ── Tokens ─────────────────────────────────────────────────── */
+/* ── Google Fonts: Inter 400 + 500 only ─────────────────────── */
+/* Loaded via <link> in HTML — declaration here for reference   */
+
+/* ── Colour tokens ──────────────────────────────────────────── */
 
 :root {
-  /* Colours — light mode default */
-  --bg:       #ffffff;
-  --text:     #0f0f0f;
-  --muted:    rgba(15, 15, 15, 0.45);
-  --rule:     rgba(15, 15, 15, 0.15);
-
-  /* Margins */
-  --margin-h:       6.5vw;    /* left + right, symmetric            */
-  --margin-top:     4.5vh;
-  --margin-bottom:  6vh;
-
-  /* Wordmark */
-  --wm-font-size:   27.8vw;   /* 109.1px ÷ 393px × 100             */
-  --wm-line-height: 0.93;
-  --wm-font-weight: 500;
-  --wm-top:         10vh;
-
-  /* QR code */
-  --qr-size:         63%;     /* % of content width                 */
-  --qr-top:          42vh;
-  --qr-border-width: 2.5px;
-
-  /* Contact — name */
-  --name-font-size:   6.35vw; /* 25.0px ÷ 393px × 100              */
-  --name-font-weight: 500;
-  --name-line-height: 1.25;
-  --name-top:         77vh;
-
-  /* Contact — body */
-  --body-font-size:   6.35vw; /* 25.0px ÷ 393px × 100              */
-  --body-line-height: 1.3;
-  --body-gap:         6.77vw; /* 26.6px ÷ 393px × 100              */
-  --body-top:         83.5vh;
-
-  /* Credentials weight */
-  --cred-font-weight: 400;
-
-  /* Transitions */
-  --fade: color 0.35s ease, background-color 0.35s ease,
-          border-color 0.35s ease, opacity 0.35s ease;
-
-  /* Tilt (set by JS) */
-  --tilt-x: 0deg;
-  --tilt-y: 0deg;
+  --bg:        #ffffff;
+  --text:      #111111;
+  --qr-border: #111111;
+  --qr-dark:   #111111;
+  --qr-light:  #ffffff;
+  --fade: background-color 0.3s ease, color 0.3s ease,
+          border-color 0.3s ease, opacity 0.3s ease;
 }
 
-/* Dark mode */
 body.dark {
-  --bg:    #0f0f0f;
-  --text:  #f5f3ef;
-  --muted: rgba(245, 243, 239, 0.45);
-  --rule:  rgba(245, 243, 239, 0.15);
+  --bg:        #111111;
+  --text:      #f0f0f0;
+  --qr-border: #f0f0f0;
+  --qr-dark:   #f0f0f0;
+  --qr-light:  #111111;
 }
 
 /* ── Reset ──────────────────────────────────────────────────── */
@@ -74,6 +43,7 @@ body.dark {
 }
 
 html, body {
+  width: 100%;
   height: 100%;
   overflow: hidden;
   touch-action: manipulation;
@@ -81,9 +51,7 @@ html, body {
 
 body {
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-optical-sizing: auto;
   background-color: var(--bg);
-  color: var(--text);
   transition: var(--fade);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -105,18 +73,231 @@ button {
   border: none;
   cursor: pointer;
   padding: 0;
-  color: inherit;
   font-family: inherit;
+  color: inherit;
   touch-action: manipulation;
+}
+
+/* ── Card — full canvas background ─────────────────────────── */
+
+.card {
+  position: fixed;
+  /* Canvas: full width, stops above the 49px Safari bar */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 49px;
+  background-color: var(--bg);
+  transition: background-color 0.3s ease;
+  /* Subtle tilt parallax driven by JS custom properties */
+  will-change: transform;
+  transform:
+    perspective(900px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+  animation: fadeIn 0.45s ease both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Zone 1: Wordmark ───────────────────────────────────────── */
+/*
+  Top edge: 80.3px = 10% × 803px
+  Left edge: 25.6px (content margin)
+  Font: Inter Medium 500, 109px, line-height 0.93
+*/
+
+.wordmark {
+  position: fixed;
+  top: 10vh;        /* 80.3px @ 803px canvas height */
+  left: 6.5vw;      /* 25.6px @ 393px */
+  right: 6.5vw;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 109px;
+  font-weight: 500;
+  line-height: 0.93;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+.wordmark__line {
+  display: block;
+}
+
+/* ── Zone 2: QR code square ─────────────────────────────────── */
+/*
+  Size: 215.4px = 63% × 341.8px content width
+  Top edge: 337.3px = 42% × 803px
+  Left edge: 25.6px (content margin)
+  Border: 2.5px solid
+*/
+
+.qr-zone {
+  position: fixed;
+  top: 42vh;        /* 337.3px @ 803px */
+  left: 6.5vw;      /* 25.6px */
+  /* Width and height: 63% of content column (341.8px) = 215.4px */
+  width: calc(0.63 * (100vw - 2 * 6.5vw));
+  height: calc(0.63 * (100vw - 2 * 6.5vw));
+  border: 2.5px solid var(--qr-border);
+  transition: border-color 0.3s ease;
+  overflow: hidden;
+}
+
+/* QR canvas fills the square with no extra padding */
+.qr-zone canvas,
+.qr-zone img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* ── Theme toggle — above QR, right-aligned ─────────────────── */
+/*
+  A minimal icon in the top-right of the canvas.
+  Does not appear on the card face — positioned in the margin area.
+*/
+
+.theme-toggle {
+  position: fixed;
+  top: 10vh;        /* same vertical band as wordmark top */
+  right: 6.5vw;
+  color: var(--text);
+  opacity: 0.45;
+  transition: opacity 0.2s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  opacity: 0.9;
+  outline: none;
+}
+
+.theme-toggle svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+body.dark  .icon-moon { display: none; }
+body.light .icon-sun  { display: none; }
+
+/* ── Share button — below theme toggle ──────────────────────── */
+
+.share-btn {
+  position: fixed;
+  top: calc(10vh + 28px);   /* just below the theme toggle */
+  right: 6.5vw;
+  color: var(--text);
+  opacity: 0.45;
+  transition: opacity 0.2s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.share-btn:hover,
+.share-btn:focus-visible {
+  opacity: 0.9;
+  outline: none;
+}
+
+.share-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ── Zone 3: Contact name block ─────────────────────────────── */
+/*
+  Top edge: 618.3px = 77% × 803px
+  Font: 25px, line-height 1.25
+  "Will DiBernardo" → weight 500 (Medium)
+  ", RLA, ASLA" inline → weight 400 (Regular)
+  "Founding Principal" below → weight 400
+*/
+
+.name-block {
+  position: fixed;
+  top: 77vh;        /* 618.3px @ 803px */
+  left: 6.5vw;
+  right: 6.5vw;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 25px;
+  line-height: 1.25;
+  color: var(--text);
+  transition: color 0.3s ease;
+}
+
+.name-block__line {
+  display: block;
+}
+
+.name-medium {
+  font-weight: 500;
+}
+
+.name-regular {
+  font-weight: 400;
+}
+
+/* ── Zone 4: Contact body block ─────────────────────────────── */
+/*
+  Top edge: 670.5px = 83.5% × 803px
+  Font: Inter Regular 400, 25px, line-height 1.3
+  The 26.6px gap between name block bottom and body top is
+  already encoded in the vh positions. margin-top is set to
+  26.6px as a fallback for variable name-block heights.
+*/
+
+.body-block {
+  position: fixed;
+  top: 83.5vh;      /* 670.5px @ 803px */
+  left: 6.5vw;
+  right: 6.5vw;
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text);
+  transition: color 0.3s ease;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.body-block a {
+  color: inherit;
+  text-decoration: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.body-line {
+  display: block;
 }
 
 /* ── Install prompt ─────────────────────────────────────────── */
 
 .install-prompt {
   position: fixed;
-  top: max(env(safe-area-inset-top), 12px);
-  left: var(--margin-h);
-  right: var(--margin-h);
+  top: 0;
+  left: 6.5vw;
+  right: 6.5vw;
   z-index: 200;
   background-color: var(--text);
   color: var(--bg);
@@ -129,8 +310,8 @@ button {
   font-weight: 400;
   line-height: 1.5;
   opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(-4px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
   pointer-events: none;
 }
 
@@ -142,209 +323,10 @@ button {
 
 .install-prompt__dismiss {
   font-size: 14px;
-  opacity: 0.55;
+  opacity: 0.5;
   flex-shrink: 0;
   padding: 4px;
   color: var(--bg);
-}
-
-/* ── Card background ────────────────────────────────────────── */
-
-.card {
-  position: fixed;
-  inset: 0;
-  background-color: var(--bg);
-  transition: var(--fade), transform 0.22s ease-out;
-  will-change: transform;
-  transform:
-    perspective(900px)
-    rotateX(var(--tilt-x))
-    rotateY(var(--tilt-y));
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* ── Wordmark ───────────────────────────────────────────────── */
-
-.zone--wordmark {
-  position: fixed;
-  top: var(--wm-top);
-  left: var(--margin-h);
-  right: var(--margin-h);
-}
-
-.wordmark {
-  line-height: var(--wm-line-height);
-}
-
-.wordmark__line {
-  display: block;
-  font-size: var(--wm-font-size);
-  font-weight: var(--wm-font-weight);
-  letter-spacing: -0.01em;
-  color: var(--text);
-  transition: color 0.35s ease;
-}
-
-.wordmark__sub {
-  display: block;
-  font-size: var(--body-font-size);
-  font-weight: 400;
-  line-height: var(--body-line-height);
-  letter-spacing: 0;
-  color: var(--text);
-  opacity: 0.45;
-  transition: color 0.35s ease, opacity 0.35s ease;
-  /* First sub line gets a gap above to separate from wordmark */
-}
-
-.wordmark__sub:first-of-type {
-  margin-top: 2.5vh;
-}
-
-/* ── QR code ────────────────────────────────────────────────── */
-
-.zone--qr {
-  position: fixed;
-  top: var(--qr-top);
-  left: var(--margin-h);
-  /* Width = 63% of content area */
-  width: calc(var(--qr-size) * (100vw - 2 * var(--margin-h)) / 100);
-}
-
-.qr-wrap {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  /* Hairline border matching the rule colour */
-  outline: var(--qr-border-width) solid var(--rule);
-  outline-offset: -1px;
-  transition: outline-color 0.35s ease;
-}
-
-.qr-wrap canvas,
-.qr-wrap img {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
-.qr-label {
-  margin-top: 1.5vh;
-  font-size: 3vw;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  opacity: 0.4;
-  transition: color 0.35s ease, opacity 0.35s ease;
-}
-
-/* ── Controls (theme + share) — right of QR ────────────────── */
-/*
-  Sits in the same horizontal band as the QR, right-aligned.
-  Gap between QR right edge and controls left edge = 3vw.
-*/
-
-.zone--controls {
-  position: fixed;
-  top: var(--qr-top);
-  /* Left edge = margin-h + qr-width + gap */
-  left: calc(var(--margin-h) + var(--qr-size) * (100vw - 2 * var(--margin-h)) / 100 + 3vw);
-  right: var(--margin-h);
-  display: flex;
-  flex-direction: column;
-  gap: 2.5vh;
-}
-
-.ctrl-btn {
-  display: flex;
-  align-items: center;
-  gap: 1.8vw;
-  font-size: 3vw;
-  font-weight: 400;
-  letter-spacing: 0.03em;
-  color: var(--text);
-  opacity: 0.5;
-  transition: opacity 0.2s ease, color 0.35s ease;
-  white-space: nowrap;
-}
-
-.ctrl-btn:hover,
-.ctrl-btn:focus-visible {
-  opacity: 1;
-  outline: none;
-}
-
-.ctrl-btn svg {
-  flex-shrink: 0;
-  width: 3.5vw;
-  height: 3.5vw;
-}
-
-body.dark  .icon-moon { display: none; }
-body.light .icon-sun  { display: none; }
-
-/* ── Hairline rule ──────────────────────────────────────────── */
-
-.rule {
-  position: fixed;
-  /* Sits between phone number (~body-top + ~4 lines) and QR.
-     Visually placed just above the QR top, offset by a small gap. */
-  top: calc(var(--qr-top) - 3vh);
-  left: var(--margin-h);
-  right: var(--margin-h);
-  height: 1px;
-  background-color: var(--rule);
-  transition: background-color 0.35s ease;
-}
-
-/* ── Contact — name block ───────────────────────────────────── */
-
-.zone--contact {
-  position: fixed;
-  top: var(--name-top);
-  left: var(--margin-h);
-  right: var(--margin-h);
-}
-
-.name {
-  font-size: var(--name-font-size);
-  font-weight: var(--name-font-weight);
-  line-height: var(--name-line-height);
-  letter-spacing: -0.01em;
-  color: var(--text);
-  transition: color 0.35s ease;
-}
-
-/* ── Contact — body lines ───────────────────────────────────── */
-
-.zone--body {
-  position: fixed;
-  top: var(--body-top);
-  left: var(--margin-h);
-  right: var(--margin-h);
-  /* gap between name block and body = --body-gap handled by top offset */
-}
-
-.contact-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.contact-line {
-  display: block;
-  font-size: var(--body-font-size);
-  font-weight: var(--cred-font-weight);
-  line-height: var(--body-line-height);
-  letter-spacing: 0;
-  color: var(--text);
-  transition: color 0.35s ease;
-  -webkit-user-select: text;
-  user-select: text;
 }
 
 /* ── Reduced motion ─────────────────────────────────────────── */

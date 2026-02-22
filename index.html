@@ -20,7 +20,7 @@
   <link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
 
-  <!-- Inter via Google Fonts — Medium (500) + Regular (400) only -->
+  <!-- Inter: Regular (400) + Medium (500) only -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" />
@@ -29,89 +29,76 @@
 </head>
 <body class="light">
 
-  <!-- Install prompt — browser only, hidden in standalone PWA -->
+  <!-- Install prompt (browser only, not shown in standalone PWA) -->
   <div class="install-prompt" id="installPrompt" aria-live="polite">
     <span>Add to Home Screen for the full experience</span>
     <button class="install-prompt__dismiss" id="dismissPrompt" aria-label="Dismiss">&#x2715;</button>
   </div>
 
-  <!-- Card background layer -->
+  <!-- Card background -->
   <main class="card" id="card" role="main" aria-label="Sit-Still business card">
 
-    <!-- Wordmark: sit— / still + landscape architecture / los angeles -->
-    <section class="zone--wordmark" aria-label="Sit-Still Landscape Architecture">
-      <div class="wordmark">
-        <span class="wordmark__line">sit&#x2014;</span>
-        <span class="wordmark__line">still</span>
-      </div>
-      <span class="wordmark__sub">landscape architecture</span>
-      <span class="wordmark__sub">los angeles</span>
-    </section>
-
-    <!-- Hairline rule above the QR band -->
-    <div class="rule" role="separator"></div>
-
-    <!-- QR code — left of the action band -->
-    <div class="zone--qr" aria-label="QR code — scan to save contact">
-      <div class="qr-wrap">
-        <div id="qrcode"></div>
-      </div>
-      <p class="qr-label">scan to save contact</p>
+    <!-- Zone 1: Wordmark — top: 10vh, font 109px/0.93, Inter Medium -->
+    <div class="wordmark" aria-label="Sit-Still">
+      <span class="wordmark__line">sit&#x2014;</span>
+      <span class="wordmark__line">still</span>
     </div>
 
-    <!-- Controls — right of the QR -->
-    <div class="zone--controls" role="group" aria-label="Card controls">
+    <!-- Zone 2: QR code square — top: 42vh, 63% content width -->
+    <div class="qr-zone" id="qrcode" aria-label="QR code — scan to save contact"></div>
 
-      <button class="ctrl-btn" id="btnTheme" aria-label="Switch to dark mode">
-        <svg class="icon-moon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-          <path d="M14.5 10.5A6 6 0 0 1 7.5 3.5a6 6 0 1 0 7 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <svg class="icon-sun" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-          <circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.5"/>
-          <line x1="9"    y1="1"    x2="9"    y2="3"    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="9"    y1="15"   x2="9"    y2="17"   stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="1"    y1="9"    x2="3"    y2="9"    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="15"   y1="9"    x2="17"   y2="9"    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="3.22" y1="3.22" x2="4.64" y2="4.64" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="13.36" y1="13.36" x2="14.78" y2="14.78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="14.78" y1="3.22"  x2="13.36" y2="4.64"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="4.64"  y1="13.36" x2="3.22"  y2="14.78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span id="themeLabel">dark mode</span>
-      </button>
-
-      <button class="ctrl-btn" id="btnShare" aria-label="Share contact card">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <path d="M8 1v9M5 4l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M3 7H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span>share</span>
-      </button>
-
-      <a href="https://sit-still.com" class="ctrl-btn" target="_blank" rel="noopener" aria-label="Visit sit-still.com">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M8 1.5C8 1.5 6 4 6 8s2 6.5 2 6.5M8 1.5C8 1.5 10 4 10 8s-2 6.5-2 6.5M1.5 8h13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span>sit-still.com</span>
-      </a>
-
+    <!-- Zone 3: Name block — top: 77vh, 25px/1.25 -->
+    <!--
+      Line 1: "Will DiBernardo" (Medium 500) + ", RLA, ASLA" (Regular 400) inline
+      Line 2: "Founding Principal" (Regular 400)
+    -->
+    <div class="name-block">
+      <span class="name-block__line">
+        <span class="name-medium">Will DiBernardo</span><span class="name-regular">, RLA, ASLA</span>
+      </span>
+      <span class="name-block__line name-regular">Founding Principal</span>
     </div>
 
-    <!-- Contact name + credentials -->
-    <section class="zone--contact" aria-label="Contact name">
-      <h1 class="name">Will DiBernardo</h1>
-    </section>
-
-    <!-- Contact body lines -->
-    <div class="zone--body" aria-label="Contact details">
-      <div class="contact-details">
-        <span class="contact-line">RLA, ASLA, #6962</span>
-        <span class="contact-line">Founding Principal</span>
-        <a href="mailto:will@sit-still.com" class="contact-line">will@sit-still.com</a>
-        <a href="tel:+12014520547"          class="contact-line">201.452.0547</a>
-      </div>
+    <!-- Zone 4: Contact body — top: 83.5vh, 25px/1.3, Regular 400 -->
+    <div class="body-block">
+      <a href="mailto:will@sit-still.com" class="body-line">will@sit-still.com</a>
+      <a href="tel:+12014520547"          class="body-line">201.452.0547</a>
     </div>
+
+    <!-- Theme toggle — top-right, minimal, does not disrupt card face -->
+    <button class="theme-toggle" id="btnTheme" aria-label="Switch to dark mode">
+      <!-- Moon: shown in light mode to offer dark -->
+      <svg class="icon-moon" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M14.5 10.5A6 6 0 0 1 7.5 3.5a6 6 0 1 0 7 7z"
+              stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <!-- Sun: shown in dark mode to offer light -->
+      <svg class="icon-sun" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <circle cx="9" cy="9" r="3.5" stroke="currentColor" stroke-width="1.5"/>
+        <line x1="9"    y1="1"    x2="9"    y2="3"    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="9"    y1="15"   x2="9"    y2="17"   stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="1"    y1="9"    x2="3"    y2="9"    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="15"   y1="9"    x2="17"   y2="9"    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="3.22" y1="3.22" x2="4.64" y2="4.64" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13.36" y1="13.36" x2="14.78" y2="14.78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="14.78" y1="3.22"  x2="13.36" y2="4.64"  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="4.64"  y1="13.36" x2="3.22"  y2="14.78" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span id="themeLabel">dark</span>
+    </button>
+
+    <!-- Share button — below theme toggle, right-aligned -->
+    <button class="share-btn" id="btnShare" aria-label="Share contact card">
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 1v9M5 4l3-3 3 3"
+              stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 7H2a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1"
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span>share</span>
+    </button>
 
   </main>
 
