@@ -105,14 +105,14 @@ button {
 
 /* ── Zone 1: Wordmark ───────────────────────────────────────── */
 /*
-  Top edge: 80.3px = 10% × 803px
+  Shifted up ~10vh from original 10vh spec → now 0vh
   Left edge: 25.6px (content margin)
   Font: Inter Medium 500, 109px, line-height 0.93
 */
 
 .wordmark {
   position: fixed;
-  top: 10vh;        /* 80.3px @ 803px canvas height */
+  top: 0vh;         /* shifted up ~10vh from original 10vh */
   left: 6.5vw;      /* 25.6px @ 393px */
   right: 6.5vw;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -130,21 +130,19 @@ button {
 
 /* ── Zone 2: QR code square ─────────────────────────────────── */
 /*
-  Size: 215.4px = 63% × 341.8px content width
-  Top edge: 337.3px = 42% × 803px
+  Size: 47.25% of content width (original 63% × 75% reduction)
+  Top edge: shifted up ~10vh → 32vh
   Left edge: 25.6px (content margin)
-  Border: 2.5px solid
+  No border.
 */
 
 .qr-zone {
   position: fixed;
-  top: 42vh;        /* 337.3px @ 803px */
+  top: 32vh;        /* shifted up ~10vh from original 42vh */
   left: 6.5vw;      /* 25.6px */
-  /* Width and height: 63% of content column (341.8px) = 215.4px */
-  width: calc(0.63 * (100vw - 2 * 6.5vw));
-  height: calc(0.63 * (100vw - 2 * 6.5vw));
-  border: 2.5px solid var(--qr-border);
-  transition: border-color 0.3s ease;
+  /* Width and height: 47.25% of content column (63% × 75%) */
+  width: calc(0.4725 * (100vw - 2 * 6.5vw));
+  height: calc(0.4725 * (100vw - 2 * 6.5vw));
   overflow: hidden;
 }
 
@@ -156,19 +154,27 @@ button {
   display: block;
 }
 
-/* ── Theme toggle — above QR, right-aligned ─────────────────── */
+/* ── Bottom bar — dark toggle | share | sit-still.com ───────── */
 /*
-  A minimal icon in the top-right of the canvas.
-  Does not appear on the card face — positioned in the margin area.
+  Fixed to the bottom of the usable canvas (above Safari bar).
+  Three items in a row: theme toggle, share button, website link.
 */
 
-.theme-toggle {
+.bottom-bar {
   position: fixed;
-  top: 10vh;        /* same vertical band as wordmark top */
+  bottom: calc(49px + 16px);   /* above Safari bar with breathing room */
+  left: 6.5vw;
   right: 6.5vw;
+  display: flex;
+  align-items: center;
+  gap: 20px;
   color: var(--text);
-  opacity: 0.45;
-  transition: opacity 0.2s ease, color 0.3s ease;
+  transition: color 0.3s ease;
+}
+
+.theme-toggle,
+.share-btn,
+.website-link {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -176,15 +182,24 @@ button {
   font-size: 11px;
   font-weight: 400;
   letter-spacing: 0.04em;
+  color: var(--text);
+  opacity: 0.45;
+  transition: opacity 0.2s ease, color 0.3s ease;
+  text-decoration: none;
 }
 
 .theme-toggle:hover,
-.theme-toggle:focus-visible {
+.theme-toggle:focus-visible,
+.share-btn:hover,
+.share-btn:focus-visible,
+.website-link:hover,
+.website-link:focus-visible {
   opacity: 0.9;
   outline: none;
 }
 
-.theme-toggle svg {
+.theme-toggle svg,
+.share-btn svg {
   width: 14px;
   height: 14px;
   flex-shrink: 0;
@@ -193,39 +208,9 @@ button {
 body.dark  .icon-moon { display: none; }
 body.light .icon-sun  { display: none; }
 
-/* ── Share button — below theme toggle ──────────────────────── */
-
-.share-btn {
-  position: fixed;
-  top: calc(10vh + 28px);   /* just below the theme toggle */
-  right: 6.5vw;
-  color: var(--text);
-  opacity: 0.45;
-  transition: opacity 0.2s ease, color 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Inter', sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-}
-
-.share-btn:hover,
-.share-btn:focus-visible {
-  opacity: 0.9;
-  outline: none;
-}
-
-.share-btn svg {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-
 /* ── Zone 3: Contact name block ─────────────────────────────── */
 /*
-  Top edge: 618.3px = 77% × 803px
+  Top edge: shifted up ~10vh → 67vh
   Font: 25px, line-height 1.25
   "Will DiBernardo" → weight 500 (Medium)
   ", RLA, ASLA" inline → weight 400 (Regular)
@@ -234,7 +219,7 @@ body.light .icon-sun  { display: none; }
 
 .name-block {
   position: fixed;
-  top: 77vh;        /* 618.3px @ 803px */
+  top: 67vh;        /* shifted up ~10vh from original 77vh */
   left: 6.5vw;
   right: 6.5vw;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -258,16 +243,14 @@ body.light .icon-sun  { display: none; }
 
 /* ── Zone 4: Contact body block ─────────────────────────────── */
 /*
-  Top edge: 670.5px = 83.5% × 803px
+  Top edge: shifted up ~10vh from 83.5vh, then extra gap added
+  to increase spacing below "Founding Principal" → 79vh
   Font: Inter Regular 400, 25px, line-height 1.3
-  The 26.6px gap between name block bottom and body top is
-  already encoded in the vh positions. margin-top is set to
-  26.6px as a fallback for variable name-block heights.
 */
 
 .body-block {
   position: fixed;
-  top: 83.5vh;      /* 670.5px @ 803px */
+  top: 79vh;        /* shifted up ~10vh, plus larger gap from name-block */
   left: 6.5vw;
   right: 6.5vw;
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;

@@ -84,7 +84,7 @@ function buildQRCode() {
     height:       px,
     colorDark:    dark ? '#f0f0f0' : '#111111',
     colorLight:   dark ? '#111111' : '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M,
+    correctLevel: QRCode.CorrectLevel.L,
   });
 }
 
